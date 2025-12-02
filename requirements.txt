@@ -1,0 +1,21 @@
+# Django & Database
+Django>=4.2,<5.0
+mysqlclient>=2.2.0
+
+# Django REST Framework
+djangorestframework>=3.14.0
+
+# CORS Headers (cho Frontend Next.js)
+django-cors-headers>=4.3.0
+
+# Optional: Rich Text Editor
+# django-ckeditor>=6.7.0
+
+# Optional: Auto Slug
+# django-autoslug>=1.9.9
+
+# Optional: Image Processing
+# Pillow>=10.0.0
+
+# Optional: Environment Variables
+# python-decouple>=3.8
