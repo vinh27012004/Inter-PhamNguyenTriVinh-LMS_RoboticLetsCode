@@ -163,7 +163,7 @@ class ProgramSerializer(serializers.ModelSerializer):
         read_only=True
     )
     subcourse_count = serializers.SerializerMethodField()
-    total_lesson_count = serializers.SerializerMethodField()
+    total_lessons = serializers.SerializerMethodField() 
     
     class Meta:
         model = Program
@@ -179,7 +179,7 @@ class ProgramSerializer(serializers.ModelSerializer):
             'status_display',
             'sort_order',
             'subcourse_count',
-            'total_lesson_count',
+            'total_lessons',
             'subcourses',  # Nested subcourses
             'created_at',
             'updated_at',
@@ -190,12 +190,13 @@ class ProgramSerializer(serializers.ModelSerializer):
         """Đếm số lượng khóa con"""
         return obj.subcourses.count()
     
-    def get_total_lesson_count(self, obj):
+    def get_total_lessons(self, obj):
         """Đếm tổng số bài học trong tất cả subcourses"""
-        total = 0
-        for subcourse in obj.subcourses.all():
-            total += subcourse.lessons.count()
-        return total
+        from .models import Lesson
+        return Lesson.objects.filter(
+            subcourse__program=obj, 
+            status='PUBLISHED'
+        ).count()
 
 
 class ProgramListSerializer(serializers.ModelSerializer):
@@ -212,6 +213,7 @@ class ProgramListSerializer(serializers.ModelSerializer):
         read_only=True
     )
     subcourse_count = serializers.SerializerMethodField()
+    total_lessons = serializers.SerializerMethodField()
     
     class Meta:
         model = Program
@@ -227,12 +229,20 @@ class ProgramListSerializer(serializers.ModelSerializer):
             'status_display',
             'sort_order',
             'subcourse_count',
+            'total_lessons',
         ]
         read_only_fields = ['id']
     
     def get_subcourse_count(self, obj):
         """Đếm số lượng khóa con"""
         return obj.subcourses.count()
+    
+    def get_total_lessons(self, obj):
+        """Đếm tổng số bài học trong tất cả subcourses"""
+        return Lesson.objects.filter(
+            subcourse__program=obj, 
+            status='PUBLISHED'
+        ).count()
 
 
 class UserProgressSerializer(serializers.ModelSerializer):

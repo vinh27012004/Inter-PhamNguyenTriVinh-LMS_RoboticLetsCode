@@ -25,14 +25,14 @@ export const getPrograms = async (params = {}) => {
 
 /**
  * Lấy chi tiết 1 Program (kèm nested subcourses và lessons)
- * GET /api/content/programs/{id}/
+ * GET /api/content/programs/{slug}/
  */
-export const getProgramDetail = async (id) => {
+export const getProgramDetail = async (slug) => {
   try {
-    const response = await axiosInstance.get(`/content/programs/${id}/`);
+    const response = await axiosInstance.get(`/content/programs/${slug}/`);
     return response.data;
   } catch (error) {
-    console.error(`Error fetching program ${id}:`, error);
+    console.error(`Error fetching program ${slug}:`, error);
     throw error;
   }
 };

@@ -3,7 +3,7 @@ Views (ViewSets) cho Content API
 Read-only endpoints cho Program, Subcourse, Lesson
 """
 from rest_framework import viewsets, filters
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
@@ -27,9 +27,10 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     
     Endpoints:
     - GET /api/programs/ - List tất cả programs
-    - GET /api/programs/{id}/ - Chi tiết 1 program (có nested subcourses)
+    - GET /api/programs/{slug}/ - Chi tiết 1 program (có nested subcourses)
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]  # Cho phép truy cập công khai
+    lookup_field = 'slug'  # Sử dụng slug thay vì id để lookup
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['kit_type', 'status']
     search_fields = ['title', 'description']
@@ -68,7 +69,7 @@ class SubcourseViewSet(viewsets.ReadOnlyModelViewSet):
     - GET /api/subcourses/ - List tất cả subcourses
     - GET /api/subcourses/{id}/ - Chi tiết 1 subcourse (có nested lessons)
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]  # Cho phép truy cập công khai
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['program', 'coding_language', 'status']
     search_fields = ['title', 'subtitle', 'description']
@@ -108,7 +109,7 @@ class LessonViewSet(viewsets.ReadOnlyModelViewSet):
     - GET /api/lessons/ - List tất cả lessons
     - GET /api/lessons/{id}/ - Chi tiết 1 lesson
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]  # Cho phép truy cập công khai
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['subcourse', 'subcourse__program', 'status']
     search_fields = ['title', 'subtitle', 'objective', 'content_text']

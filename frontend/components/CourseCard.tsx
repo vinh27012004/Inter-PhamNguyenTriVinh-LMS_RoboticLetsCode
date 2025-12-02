@@ -10,6 +10,7 @@ import { Cpu, Sparkles } from 'lucide-react';
 
 interface CourseCardProps {
   id: number;
+  slug: string;
   title: string;
   description?: string;
   thumbnail?: string;
@@ -20,6 +21,7 @@ interface CourseCardProps {
 
 export default function CourseCard({
   id,
+  slug,
   title,
   description,
   thumbnail,
@@ -49,7 +51,7 @@ export default function CourseCard({
   const Icon = config.icon;
 
   return (
-    <Link href={`/courses/${id}`}>
+    <Link href={`/courses/${slug}`}>
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer group">
         {/* Thumbnail */}
         <div className="relative h-48 bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden">

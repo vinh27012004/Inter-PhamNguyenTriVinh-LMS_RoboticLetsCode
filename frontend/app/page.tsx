@@ -12,12 +12,13 @@ import SkeletonCard from '@/components/SkeletonCard';
 
 interface Program {
   id: number;
+  slug: string;
   title: string;
   description: string;
-  thumbnail: string;
+  thumbnail_url: string;
   kit_type: 'SPIKE_ESSENTIAL' | 'SPIKE_PRIME';
   subcourse_count: number;
-  total_lessons: number;
+  total_lessons?: number;
 }
 
 export default function HomePage() {
@@ -95,12 +96,13 @@ export default function HomePage() {
               <CourseCard
                 key={program.id}
                 id={program.id}
+                slug={program.slug}
                 title={program.title}
                 description={program.description}
-                thumbnail={program.thumbnail}
+                thumbnail={program.thumbnail_url}
                 kit_type={program.kit_type}
                 subcourse_count={program.subcourse_count}
-                total_lessons={program.total_lessons}
+                total_lessons={program.total_lessons || 0}
               />
             ))}
           </div>
