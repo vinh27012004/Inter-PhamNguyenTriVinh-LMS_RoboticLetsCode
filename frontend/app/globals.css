@@ -35,15 +35,15 @@ a {
 
 @layer base {
   :root {
-    --background-start-rgb: 255, 255, 255;
-    --background-end-rgb: 255, 255, 255;
-    --foreground-rgb: 0, 0, 0;
+    --background-start-rgb: 255, 200, 0;      
+    --background-end-rgb: 156, 0, 229;      
+    --foreground-rgb: 0, 0, 0
   }
 
   @media (prefers-color-scheme: dark) {
     :root {
-      --background-start-rgb: 0, 0, 0;
-      --background-end-rgb: 0, 0, 0;
+      --background-start-rgb: 156, 0, 229;  
+      --background-end-rgb: 179, 39, 245;   
       --foreground-rgb: 255, 255, 255;
     }
   }

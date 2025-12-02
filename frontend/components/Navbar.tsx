@@ -25,7 +25,7 @@ export default function Navbar() {
       <div className="flex-shrink-0">
         <Link href="/">
           <img
-            src="/images/LOGO.png"
+            src="\images\logo\Profile banner - 1.png"
             alt="Robotics Let's Code"
             className="h-10 w-auto"
           />

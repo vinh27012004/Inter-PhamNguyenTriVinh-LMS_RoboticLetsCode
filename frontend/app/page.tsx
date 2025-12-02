@@ -49,7 +49,7 @@ export default function HomePage() {
       <div className="text-center mb-16">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
           Chào mừng đến với
-          <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mt-2">
+          <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-950 to-yellow-600 mt-2">
             Robotics Let's Code
           </span>
         </h1>
