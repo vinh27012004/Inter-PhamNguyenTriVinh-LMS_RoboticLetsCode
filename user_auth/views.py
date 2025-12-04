@@ -134,8 +134,10 @@ class AuthAssignmentViewSet(viewsets.ReadOnlyModelViewSet):
         """
         Custom action: Lấy danh sách Subcourses mà user có quyền truy cập
         GET /api/assignments/my_subcourses/
+        GET /api/assignments/my_subcourses/?program_id=1  # Filter theo program
         """
         user = request.user
+        program_id = request.query_params.get('program_id')
         
         # Lấy các assignments active của user
         assignments = AuthAssignment.objects.filter(
@@ -148,11 +150,22 @@ class AuthAssignmentViewSet(viewsets.ReadOnlyModelViewSet):
         for assignment in assignments:
             if assignment.subcourse:
                 # Gán trực tiếp 1 subcourse
-                subcourse_ids.add(assignment.subcourse.id)
+                if program_id:
+                    # Filter theo program nếu có
+                    if str(assignment.subcourse.program_id) == program_id:
+                        subcourse_ids.add(assignment.subcourse.id)
+                else:
+                    subcourse_ids.add(assignment.subcourse.id)
             elif assignment.program:
                 # Gán cả program -> có quyền tất cả subcourses
-                for subcourse in assignment.program.subcourses.all():
-                    subcourse_ids.add(subcourse.id)
+                if program_id:
+                    # Filter theo program nếu có
+                    if str(assignment.program.id) == program_id:
+                        for subcourse in assignment.program.subcourses.all():
+                            subcourse_ids.add(subcourse.id)
+                else:
+                    for subcourse in assignment.program.subcourses.all():
+                        subcourse_ids.add(subcourse.id)
         
         return Response({
             'subcourse_ids': list(subcourse_ids),

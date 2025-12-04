@@ -7,6 +7,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Q
+from django.db import models
 
 from .models import Program, Subcourse, Lesson, UserProgress
 from .serializers import (
@@ -66,15 +68,23 @@ class SubcourseViewSet(viewsets.ReadOnlyModelViewSet):
     Read-only: Học viên chỉ xem
     
     Endpoints:
-    - GET /api/subcourses/ - List tất cả subcourses
-    - GET /api/subcourses/{id}/ - Chi tiết 1 subcourse (có nested lessons)
+    - GET /api/subcourses/ - List tất cả subcourses (public)
+    - GET /api/subcourses/{id}/ - Chi tiết 1 subcourse (requires authentication & authorization)
     """
-    permission_classes = [AllowAny]  # Cho phép truy cập công khai
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['program', 'coding_language', 'status']
     search_fields = ['title', 'subtitle', 'description']
     ordering_fields = ['sort_order', 'created_at', 'price']
     ordering = ['program', 'sort_order']
+    
+    def get_permissions(self):
+        """
+        List: Public access
+        Detail: Requires authentication
+        """
+        if self.action == 'list':
+            return [AllowAny()]
+        return [IsAuthenticated()]
     
     def get_queryset(self):
         """
@@ -98,6 +108,45 @@ class SubcourseViewSet(viewsets.ReadOnlyModelViewSet):
         if self.action == 'list':
             return SubcourseListSerializer
         return SubcourseSerializer
+    
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Chi tiết subcourse - kiểm tra quyền truy cập
+        User phải có AuthAssignment cho subcourse này hoặc program cha của nó
+        """
+        instance = self.get_object()
+        
+        # ADMIN có quyền xem tất cả
+        if hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN':
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
+        
+        # Kiểm tra xem user có quyền truy cập không
+        from user_auth.models import AuthAssignment
+        from django.utils import timezone
+        now = timezone.now()
+        
+        # Kiểm tra assignment cho subcourse này hoặc program cha
+        has_access = AuthAssignment.objects.filter(
+            user=request.user,
+            status='ACTIVE',
+            valid_from__lte=now
+        ).filter(
+            # Kiểm tra valid_until nếu có (null = không giới hạn)
+            models.Q(valid_until__isnull=True) | models.Q(valid_until__gte=now)
+        ).filter(
+            # Có quyền trực tiếp cho subcourse này
+            (Q(subcourse=instance)) |
+            # Hoặc có quyền cho program cha (program-level access)
+            (Q(program=instance.program, subcourse__isnull=True))
+        ).exists()
+        
+        if not has_access:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied('Bạn không có quyền truy cập khóa học này.')
+        
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
 class LessonViewSet(viewsets.ReadOnlyModelViewSet):
@@ -106,15 +155,23 @@ class LessonViewSet(viewsets.ReadOnlyModelViewSet):
     Read-only: Học viên chỉ xem
     
     Endpoints:
-    - GET /api/lessons/ - List tất cả lessons
-    - GET /api/lessons/{id}/ - Chi tiết 1 lesson
+    - GET /api/lessons/ - List tất cả lessons (public)
+    - GET /api/lessons/{id}/ - Chi tiết 1 lesson (requires authentication & authorization)
     """
-    permission_classes = [AllowAny]  # Cho phép truy cập công khai
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['subcourse', 'subcourse__program', 'status']
     search_fields = ['title', 'subtitle', 'objective', 'content_text']
     ordering_fields = ['sort_order', 'created_at', 'estimated_duration']
     ordering = ['subcourse', 'sort_order']
+    
+    def get_permissions(self):
+        """
+        List: Public access
+        Detail: Requires authentication
+        """
+        if self.action == 'list':
+            return [AllowAny()]
+        return [IsAuthenticated()]
     
     def get_queryset(self):
         """
@@ -138,6 +195,45 @@ class LessonViewSet(viewsets.ReadOnlyModelViewSet):
         if self.action == 'list':
             return LessonListSerializer
         return LessonSerializer
+    
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Chi tiết lesson - kiểm tra quyền truy cập
+        User phải có AuthAssignment cho subcourse hoặc program
+        """
+        instance = self.get_object()
+        
+        # ADMIN có quyền xem tất cả
+        if hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN':
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
+        
+        # Kiểm tra xem user có quyền truy cập không
+        from user_auth.models import AuthAssignment
+        from django.utils import timezone
+        now = timezone.now()
+        
+        # Kiểm tra assignment cho subcourse chứa lesson này hoặc program cha
+        has_access = AuthAssignment.objects.filter(
+            user=request.user,
+            status='ACTIVE',
+            valid_from__lte=now
+        ).filter(
+            # Kiểm tra valid_until nếu có (null = không giới hạn)
+            models.Q(valid_until__isnull=True) | models.Q(valid_until__gte=now)
+        ).filter(
+            # Có quyền cho subcourse chứa lesson này
+            (Q(subcourse=instance.subcourse)) |
+            # Hoặc có quyền cho program cha (program-level access)
+            (Q(program=instance.subcourse.program, subcourse__isnull=True))
+        ).exists()
+        
+        if not has_access:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied('Bạn không có quyền truy cập bài học này.')
+        
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
     
     @action(detail=True, methods=['post'])
     def mark_complete(self, request, pk=None):

@@ -6,7 +6,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
   ArrowLeft, 
@@ -21,6 +21,7 @@ import {
 import Link from 'next/link';
 import { getLessonDetail, markLessonComplete } from '@/services/robotics';
 import CodeViewer from '@/components/CodeViewer';
+import Cookies from 'js-cookie';
 
 interface Lesson {
   id: number;
@@ -44,6 +45,7 @@ type TabType = 'overview' | 'assembly' | 'challenge';
 
 export default function LessonDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const lessonId = params.id as string;
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
@@ -52,26 +54,43 @@ export default function LessonDetailPage() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [isCompleted, setIsCompleted] = useState(false);
   const [isMarking, setIsMarking] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Kiểm tra authentication
+  useEffect(() => {
+    const token = Cookies.get('access_token') || localStorage.getItem('access_token');
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+    setIsAuthenticated(true);
+  }, [router]);
 
   useEffect(() => {
     const fetchLesson = async () => {
+      if (!isAuthenticated) return;
+
       try {
         setLoading(true);
         const data = await getLessonDetail(Number(lessonId));
         setLesson(data);
         setError(null);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching lesson:', err);
-        setError('Không thể tải thông tin bài học. Vui lòng thử lại sau.');
+        if (err.response?.status === 403) {
+          setError('Bạn không có quyền truy cập bài học này.');
+        } else {
+          setError('Không thể tải thông tin bài học. Vui lòng thử lại sau.');
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    if (lessonId) {
+    if (lessonId && isAuthenticated) {
       fetchLesson();
     }
-  }, [lessonId]);
+  }, [lessonId, isAuthenticated]);
 
   const handleMarkComplete = async () => {
     if (!lesson || isMarking) return;
@@ -86,6 +105,11 @@ export default function LessonDetailPage() {
       setIsMarking(false);
     }
   };
+
+  // Redirect if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
 
   // Loading state
   if (loading) {

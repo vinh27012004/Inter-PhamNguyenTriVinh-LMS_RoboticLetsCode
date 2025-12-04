@@ -4,9 +4,11 @@ mysqlclient>=2.2.0
 
 # Django REST Framework
 djangorestframework>=3.14.0
+djangorestframework-simplejwt>=5.3.0
 
 # CORS Headers (cho Frontend Next.js)
 django-cors-headers>=4.3.0
+django-filter>=23.0
 
 # Optional: Rich Text Editor
 # django-ckeditor>=6.7.0

@@ -3,6 +3,10 @@ URL configuration for E-Robotic Let's Code project.
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 urlpatterns = [
     # Django Admin
@@ -11,6 +15,10 @@ urlpatterns = [
     # REST API Endpoints
     path('api/content/', include('content.urls')),
     path('api/auth/', include('user_auth.urls')),
+    
+    # JWT Authentication
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     
     # DRF Authentication (Login/Logout trong Browsable API)
     path('api-auth/', include('rest_framework.urls')),
@@ -21,13 +29,17 @@ urlpatterns = [
 # ADMIN:
 # /admin/ - Django Admin Panel
 #
+# JWT AUTHENTICATION:
+# /api/token/ - Lấy access & refresh token (POST: username, password)
+# /api/token/refresh/ - Refresh access token (POST: refresh)
+#
 # CONTENT API:
 # /api/content/programs/ - Danh sách chương trình học
-# /api/content/programs/{id}/ - Chi tiết chương trình
+# /api/content/programs/{slug}/ - Chi tiết chương trình
 # /api/content/subcourses/ - Danh sách khóa học
-# /api/content/subcourses/{id}/ - Chi tiết khóa học
+# /api/content/subcourses/{id}/ - Chi tiết khóa học (requires auth)
 # /api/content/lessons/ - Danh sách bài học
-# /api/content/lessons/{id}/ - Chi tiết bài học
+# /api/content/lessons/{id}/ - Chi tiết bài học (requires auth)
 # /api/content/lessons/{id}/mark_complete/ - Đánh dấu hoàn thành bài học
 # /api/content/progress/ - Tiến độ học tập của user
 #

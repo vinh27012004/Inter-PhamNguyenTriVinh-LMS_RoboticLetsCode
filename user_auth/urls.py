@@ -32,3 +32,5 @@ urlpatterns = [
 # /api/auth/assignments/my_subcourses/ - Danh sách Subcourse IDs có quyền
 # /api/auth/me/ - Thông tin user + profile + assignments
 # /api/auth/me/info/ - GET thông tin đầy đủ user hiện tại
+#
+# LƯU Ý: Quản lý phân quyền (AuthAssignment) được thực hiện qua Django Admin Panel
