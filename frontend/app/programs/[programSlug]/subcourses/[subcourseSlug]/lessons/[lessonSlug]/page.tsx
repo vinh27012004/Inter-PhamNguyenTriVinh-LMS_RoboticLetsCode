@@ -8,28 +8,21 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getLessons } from '@/services/robotics';
-import { ArrowLeft, Video, Code2, FileText } from 'lucide-react';
-import CodeViewer from '@/components/CodeViewer';
+import { ArrowLeft } from 'lucide-react';
+  import Image from 'next/image';
 
 interface Lesson {
   id: number;
   slug: string;
   title: string;
-  lesson_order: number;
-  content: string;
-  video_url?: string;
-  code_content?: string;
-  project_file?: string;
-  subcourse: {
-    id: number;
-    slug: string;
-    title: string;
-    program?: {
-      id: number;
-      slug: string;
-      title: string;
-    };
-  };
+  objective: string;
+  knowledge_skills: string;
+  content_text: string;
+  status: string;
+  status_display: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export default function LessonDetailPage() {
@@ -42,7 +35,6 @@ export default function LessonDetailPage() {
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'video' | 'code' | 'content'>('video');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,14 +49,9 @@ export default function LessonDetailPage() {
         }
 
         // Lấy chi tiết lesson bằng slug
-        const { getLessons } = await import('@/services/robotics');
-        const lessonsData = await getLessons({ slug: lessonSlug });
-        
-        if (lessonsData.results && lessonsData.results.length > 0) {
-          setLesson(lessonsData.results[0]);
-        } else {
-          setError('Không tìm thấy bài học này');
-        }
+        const { getLessonDetail } = await import('@/services/robotics');
+        const lessonData = await getLessonDetail(lessonSlug);
+        setLesson(lessonData);
       } catch (err: any) {
         console.error('Error fetching lesson:', err);
         if (err.response?.status === 404) {
@@ -125,7 +112,7 @@ export default function LessonDetailPage() {
           </button>
           <div className="flex items-center gap-3">
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-              Bài {lesson.lesson_order}
+              Bài {lesson.sort_order}
             </span>
             <h1 className="text-2xl font-bold text-gray-900">{lesson.title}</h1>
           </div>
@@ -133,106 +120,71 @@ export default function LessonDetailPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Tabs */}
-        <div className="bg-white rounded-t-xl shadow-md">
-          <div className="flex border-b border-gray-200">
-            {lesson.video_url && (
-              <button
-                onClick={() => setActiveTab('video')}
-                className={`flex items-center px-6 py-4 font-medium transition-colors ${
-                  activeTab === 'video'
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <Video className="w-5 h-5 mr-2" />
-                Video hướng dẫn
-              </button>
-            )}
-            {lesson.code_content && (
-              <button
-                onClick={() => setActiveTab('code')}
-                className={`flex items-center px-6 py-4 font-medium transition-colors ${
-                  activeTab === 'code'
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <Code2 className="w-5 h-5 mr-2" />
-                Code mẫu
-              </button>
-            )}
-            <button
-              onClick={() => setActiveTab('content')}
-              className={`flex items-center px-6 py-4 font-medium transition-colors ${
-                activeTab === 'content'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <FileText className="w-5 h-5 mr-2" />
-              Nội dung
-            </button>
-          </div>
-
-          {/* Tab Content */}
-          <div className="p-8">
-            {activeTab === 'video' && lesson.video_url && (
-              <div className="aspect-video bg-black rounded-lg overflow-hidden">
-                <video
-                  controls
-                  className="w-full h-full"
-                  src={lesson.video_url}
-                >
-                  Trình duyệt của bạn không hỗ trợ video.
-                </video>
-              </div>
-            )}
-
-            {activeTab === 'code' && lesson.code_content && (
-              <div>
-                <CodeViewer code={lesson.code_content} language="python" />
-                {lesson.project_file && (
-                  <div className="mt-6">
-                    <a
-                      href={lesson.project_file}
-                      download
-                      className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      <FileText className="w-5 h-5 mr-2" />
-                      Tải file dự án
-                    </a>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {activeTab === 'content' && (
-              <div className="prose max-w-none">
-                <div
-                  className="text-gray-700 leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: lesson.content }}
-                />
-              </div>
-            )}
-          </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
+        {/* Mascot Decoration */}
+        <div className="absolute right-0 top-0 opacity-20 hidden lg:block">
+          <Image
+            src="/images/mascot/leco game 7.png"
+            alt="Mascot"
+            width={150}
+            height={150}
+            className="animate-float"
+          />
         </div>
 
-        {/* Project File Download (if exists) */}
-        {lesson.project_file && activeTab !== 'code' && (
-          <div className="mt-6 bg-white rounded-xl shadow-md p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">File dự án</h3>
-            <a
-              href={lesson.project_file}
-              download
-              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <FileText className="w-5 h-5 mr-2" />
-              Tải file dự án
-            </a>
+        {/* Main Content Area */}
+        <div className="bg-white rounded-xl shadow-md p-8 space-y-8">
+          {/* Lesson Objective */}
+          {lesson.objective && (
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-lg font-bold text-gray-900 mb-3">🎯 Mục tiêu bài học</h2>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{lesson.objective}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Knowledge & Skills */}
+          {lesson.knowledge_skills && (
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-lg font-bold text-gray-900 mb-3">💡 Kiến thức & Kỹ năng</h2>
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">{lesson.knowledge_skills}</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Lesson Content */}
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-100">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">📚 Nội dung bài học</h2>
+                <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                  {lesson.content_text || 'Chưa cập nhật nội dung'}
+                </div>
+              </div>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

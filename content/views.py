@@ -6,6 +6,7 @@ from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from django.db import models
@@ -22,6 +23,13 @@ from .serializers import (
 )
 
 
+class StandardResultsSetPagination(PageNumberPagination):
+    """Custom pagination class with configurable page_size"""
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
 class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet cho Program (Chương trình học)
@@ -33,6 +41,7 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
     """
     permission_classes = [AllowAny]  # Cho phép truy cập công khai
     lookup_field = 'slug'  # Sử dụng slug thay vì id để lookup
+    pagination_class = StandardResultsSetPagination
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['kit_type', 'status']
     search_fields = ['title', 'description']
@@ -47,8 +56,7 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
         return Program.objects.filter(
             status='PUBLISHED'
         ).prefetch_related(
-            'subcourses',
-            'subcourses__lessons'
+            'subcourses'
         )
     
     def get_serializer_class(self):
@@ -71,9 +79,11 @@ class SubcourseViewSet(viewsets.ReadOnlyModelViewSet):
     - GET /api/subcourses/ - List tất cả subcourses (public)
     - GET /api/subcourses/{id}/ - Chi tiết 1 subcourse (requires authentication & authorization)
     """
+    lookup_field = 'slug'  # Sử dụng slug thay vì id để lookup
+    pagination_class = StandardResultsSetPagination
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['program', 'coding_language', 'status', 'slug']
-    search_fields = ['title', 'subtitle', 'description']
+    search_fields = ['title', 'description']
     ordering_fields = ['sort_order', 'created_at', 'price']
     ordering = ['program', 'sort_order']
     
@@ -96,8 +106,6 @@ class SubcourseViewSet(viewsets.ReadOnlyModelViewSet):
             program__status='PUBLISHED'
         ).select_related(
             'program'
-        ).prefetch_related(
-            'lessons'
         )
     
     def get_serializer_class(self):
@@ -158,6 +166,8 @@ class LessonViewSet(viewsets.ReadOnlyModelViewSet):
     - GET /api/lessons/ - List tất cả lessons (public)
     - GET /api/lessons/{id}/ - Chi tiết 1 lesson (requires authentication & authorization)
     """
+    lookup_field = 'slug'  # Sử dụng slug thay vì id để lookup
+    pagination_class = StandardResultsSetPagination
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['subcourse', 'subcourse__program', 'status']
     search_fields = ['title', 'subtitle', 'objective', 'content_text']

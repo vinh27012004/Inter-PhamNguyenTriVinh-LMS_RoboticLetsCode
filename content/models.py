@@ -218,11 +218,6 @@ class Lesson(models.Model):
         max_length=255,
         verbose_name='Đường dẫn URL'
     )
-    subtitle = models.CharField(
-        max_length=255,
-        blank=True,
-        verbose_name='Tiêu đề phụ'
-    )
     
     # Nội dung bài học
     objective = models.TextField(
@@ -233,7 +228,7 @@ class Lesson(models.Model):
     knowledge_skills = models.TextField(
         blank=True,
         verbose_name='Kiến thức & Kỹ năng',
-        help_text='Kiến thức và kỹ năng cần đạt được'
+        help_text='Các kiến thức và kỹ năng học được trong bài học'
     )
     content_text = models.TextField(
         blank=True,
@@ -242,25 +237,6 @@ class Lesson(models.Model):
     )
     
     # Media URLs (Lưu trên Object Storage)
-    video_url = models.URLField(
-        max_length=500,
-        blank=True,
-        verbose_name='URL Video',
-        help_text='Link video hướng dẫn từ S3/GCS'
-    )
-    project_file_url = models.URLField(
-        max_length=500,
-        blank=True,
-        verbose_name='URL File dự án',
-        help_text='Link file .llsp hoặc .py từ S3/GCS'
-    )
-    
-    # Code snippet
-    code_snippet = models.TextField(
-        blank=True,
-        verbose_name='Code mẫu',
-        help_text='Code mẫu để học viên tham khảo'
-    )
     
     status = models.CharField(
         max_length=20,
@@ -273,15 +249,6 @@ class Lesson(models.Model):
         default=1,
         validators=[MinValueValidator(1)],
         verbose_name='Thứ tự sắp xếp'
-    )
-    
-    # Thời lượng ước tính
-    estimated_duration = models.IntegerField(
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(1)],
-        verbose_name='Thời lượng (phút)',
-        help_text='Thời gian ước tính để hoàn thành bài học'
     )
     
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Ngày tạo')

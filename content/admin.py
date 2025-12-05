@@ -59,7 +59,6 @@ class LessonInline(admin.TabularInline):
         'slug',
         'status',
         'sort_order',
-        'estimated_duration',
     ]
     
     prepopulated_fields = {'slug': ('title',)}
@@ -241,9 +240,6 @@ class LessonAdmin(admin.ModelAdmin):
         'subcourse',
         'status_badge',
         'sort_order',
-        'estimated_duration',
-        'has_video',
-        'has_project_file',
         'created_at',
     ]
     
@@ -270,15 +266,11 @@ class LessonAdmin(admin.ModelAdmin):
             'fields': ('subcourse',)
         }),
         ('Thông tin cơ bản', {
-            'fields': ('title', 'slug', 'subtitle', 'estimated_duration')
+            'fields': ('title', 'slug',)
         }),
         ('Mục tiêu & Nội dung', {
             'fields': ('objective', 'knowledge_skills', 'content_text'),
             'classes': ('wide',),
-        }),
-        ('Media & Tài liệu', {
-            'fields': ('video_url', 'project_file_url', 'code_snippet'),
-            'classes': ('collapse',),
         }),
         ('Hiển thị', {
             'fields': ('status', 'sort_order'),
@@ -303,20 +295,6 @@ class LessonAdmin(admin.ModelAdmin):
             obj.get_status_display()
         )
     status_badge.short_description = 'Trạng thái'
-    
-    def has_video(self, obj):
-        """Icon hiển thị có video không"""
-        if obj.video_url:
-            return format_html('✅')
-        return format_html('❌')
-    has_video.short_description = 'Video'
-    
-    def has_project_file(self, obj):
-        """Icon hiển thị có file dự án không"""
-        if obj.project_file_url:
-            return format_html('✅')
-        return format_html('❌')
-    has_project_file.short_description = 'File dự án'
 
 
 @admin.register(UserProgress)

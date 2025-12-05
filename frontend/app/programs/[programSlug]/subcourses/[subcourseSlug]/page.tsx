@@ -7,19 +7,21 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getSubcourseDetail } from '@/services/robotics';
-import { ArrowLeft, BookOpen, Code, DollarSign, Clock, Play, Target, CheckCircle2 } from 'lucide-react';
+import { getSubcourseDetail, getLessons } from '@/services/robotics';
+import { ArrowLeft, BookOpen, Code, DollarSign, Clock, Target, CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
 
 interface Lesson {
   id: number;
   slug: string;
   title: string;
-  lesson_order: number;
-  duration?: number;
-  has_video?: boolean;
-  has_code_file?: boolean;
-  has_access?: boolean;
+  objective: string;
+  content_text: string;
+  sort_order: number;
+  status: string;
+  status_display: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface Subcourse {
@@ -76,7 +78,17 @@ export default function SubcourseDetailPage() {
         if (subcoursesData.results && subcoursesData.results.length > 0) {
           const selectedSubcourse = subcoursesData.results[0];
           console.log('Selected subcourse:', selectedSubcourse);
-          console.log('Description:', selectedSubcourse.description);
+          
+          // Fetch ALL lessons for this subcourse with large page_size
+          const lessonsData = await getLessons({ 
+            subcourse: selectedSubcourse.id,
+            page_size: 100  // Load up to 100 lessons
+          });
+          console.log('Lessons data:', lessonsData);
+          
+          // Add lessons to subcourse object
+          selectedSubcourse.lessons = lessonsData.results || [];
+          
           setSubcourse(selectedSubcourse);
         } else {
           setError('Không tìm thấy khóa học này');
@@ -259,15 +271,23 @@ export default function SubcourseDetailPage() {
                 </div>
               </div>
             </div>
+
+            {/* Mascot Decoration */}
+            <div className="hidden lg:flex absolute bottom-0 left-0 opacity-20">
+              <Image
+                src="/images/mascot/leco game 6.png"
+                alt="Mascot"
+                width={180}
+                height={180}
+                className="animate-float"
+              />
+            </div>
           </div>
 
           {/* RIGHT COLUMN - Lessons List */}
           <div className="lg:w-2/3">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-900">Danh sách bài học</h2>
-              <p className="text-gray-600 mt-2">
-                {subcourse.lessons ? `${subcourse.lessons.length} bài học` : 'Đang tải...'}
-              </p>
             </div>
 
             {subcourse.lessons && subcourse.lessons.length > 0 ? (
@@ -283,7 +303,7 @@ export default function SubcourseDetailPage() {
                         <div className="flex items-center space-x-4 flex-1">
                           {/* Lesson number badge */}
                           <div className="flex-shrink-0 w-12 h-12 rounded-full bg-brandPurple-100 text-brandPurple-600 flex items-center justify-center font-bold text-lg">
-                            {lesson.lesson_order}
+                            {lesson.sort_order}
                           </div>
                           
                           <div className="flex-1">
@@ -293,22 +313,9 @@ export default function SubcourseDetailPage() {
                             
                             {/* Metadata */}
                             <div className="flex flex-wrap gap-3 text-sm text-gray-600">
-                              {lesson.duration && (
-                                <div className="flex items-center">
-                                  <Clock className="w-4 h-4 mr-1" />
-                                  <span>{lesson.duration} phút</span>
-                                </div>
-                              )}
-                              {lesson.has_video && (
-                                <div className="flex items-center text-blue-600">
-                                  <Play className="w-4 h-4 mr-1" />
-                                  <span>Video</span>
-                                </div>
-                              )}
-                              {lesson.has_code_file && (
-                                <div className="flex items-center text-green-600">
-                                  <Code className="w-4 h-4 mr-1" />
-                                  <span>Code file</span>
+                              {lesson.objective && (
+                                <div className="flex items-center text-gray-600 line-clamp-1">
+                                  <span>{lesson.objective}</span>
                                 </div>
                               )}
                             </div>

@@ -6,6 +6,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { getPrograms } from '@/services/robotics';
 import CourseCard from '@/components/CourseCard';
 import SkeletonCard from '@/components/SkeletonCard';
@@ -35,7 +36,7 @@ export default function HomePage() {
         setError(null);
       } catch (err) {
         console.error('Error fetching programs:', err);
-        setError('Không thể tải danh sách khóa học. Vui lòng thử lại sau.');
+        setError('Không thể tải chương trình học. Vui lòng thử lại sau.');
       } finally {
         setLoading(false);
       }
@@ -47,7 +48,30 @@ export default function HomePage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Hero Section */}
-      <div className="text-center mb-16">
+      <div className="text-center mb-16 relative">
+        {/* Mascot Left */}
+        <div className="absolute left-0 top-0 -z-10 opacity-30 hidden lg:block">
+          <Image
+            src="/images/mascot/Asset 6 (2).png"
+            alt="Mascot"
+            width={140}
+            height={140}
+            className="animate-float"
+          />
+        </div>
+
+        {/* Mascot Right */}
+        <div className="absolute right-0 top-0 -z-10 opacity-30 hidden lg:block">
+          <Image
+            src="/images/mascot/Asset 7 (2).png"
+            alt="Mascot"
+            width={140}
+            height={140}
+            className="animate-float"
+            style={{ animationDelay: '1s' }}
+          />
+        </div>
+
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
           Chào mừng đến với
           <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-950 to-yellow-600 mt-2">

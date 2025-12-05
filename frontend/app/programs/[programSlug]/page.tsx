@@ -294,6 +294,17 @@ export default function ProgramDetailPage() {
             </div>
           </div>
 
+          {/* Mascot Decoration */}
+          <div className="hidden lg:flex absolute bottom-0 left-0 opacity-20">
+            <Image
+              src="/images/mascot/leco game 4.png"
+              alt="Mascot"
+              width={200}
+              height={200}
+              className="animate-float"
+            />
+          </div>
+
           {/* RIGHT COLUMN - Courses List */}
           <div className="lg:w-2/3">
             <div className="mb-6">

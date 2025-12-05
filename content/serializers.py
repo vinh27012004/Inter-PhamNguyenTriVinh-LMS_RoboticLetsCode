@@ -22,17 +22,12 @@ class LessonSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'slug',
-            'subtitle',
             'objective',
             'knowledge_skills',
             'content_text',
-            'video_url',
-            'project_file_url',
-            'code_snippet',
             'status',
             'status_display',
             'sort_order',
-            'estimated_duration',
             'created_at',
             'updated_at',
         ]
@@ -55,13 +50,9 @@ class LessonListSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'slug',
-            'subtitle',
             'status',
             'status_display',
             'sort_order',
-            'estimated_duration',
-            'video_url',
-            'project_file_url',
         ]
         read_only_fields = ['id']
 
@@ -92,7 +83,6 @@ class SubcourseSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'slug',
-            'subtitle',
             'description',
             'objective',
             'coding_language',
@@ -142,7 +132,6 @@ class SubcourseListSerializer(serializers.ModelSerializer):
             'id',
             'title',
             'slug',
-            'subtitle',
             'description',
             'objective',
             'coding_language',
@@ -167,10 +156,9 @@ class SubcourseListSerializer(serializers.ModelSerializer):
 class ProgramSerializer(serializers.ModelSerializer):
     """
     Serializer cho Program (Chương trình học)
-    Bao gồm nested list của subcourses
-    Cấu trúc cây: Program -> Subcourse -> Lesson
+    Bao gồm nested list của subcourses (rút gọn, không có lessons)
     """
-    subcourses = SubcourseSerializer(many=True, read_only=True)
+    subcourses = SubcourseListSerializer(many=True, read_only=True)
     status_display = serializers.CharField(
         source='get_status_display',
         read_only=True

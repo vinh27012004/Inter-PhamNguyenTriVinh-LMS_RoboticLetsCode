@@ -83,14 +83,14 @@ export const getLessons = async (params = {}) => {
 
 /**
  * Lấy chi tiết 1 Lesson (Bài học)
- * GET /api/content/lessons/{id}/
+ * GET /api/content/lessons/{slug}/
  */
-export const getLessonDetail = async (id) => {
+export const getLessonDetail = async (slug) => {
   try {
-    const response = await axiosInstance.get(`/content/lessons/${id}/`);
+    const response = await axiosInstance.get(`/content/lessons/${slug}/`);
     return response.data;
   } catch (error) {
-    console.error(`Error fetching lesson ${id}:`, error);
+    console.error(`Error fetching lesson ${slug}:`, error);
     throw error;
   }
 };
