@@ -1,9 +1,27 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
   images: {
-    domains: ['localhost', '127.0.0.1'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'letscode-roboticsspike.netlify.app',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'tse3.mm.bing.net',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.bing.net',
+        port: '',
+        pathname: '/**',
+      },
+    ],
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

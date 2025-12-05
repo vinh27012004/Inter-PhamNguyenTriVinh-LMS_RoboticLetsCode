@@ -72,7 +72,7 @@ class SubcourseViewSet(viewsets.ReadOnlyModelViewSet):
     - GET /api/subcourses/{id}/ - Chi tiết 1 subcourse (requires authentication & authorization)
     """
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['program', 'coding_language', 'status']
+    filterset_fields = ['program', 'coding_language', 'status', 'slug']
     search_fields = ['title', 'subtitle', 'description']
     ordering_fields = ['sort_order', 'created_at', 'price']
     ordering = ['program', 'sort_order']

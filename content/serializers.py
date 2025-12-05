@@ -80,6 +80,10 @@ class SubcourseSerializer(serializers.ModelSerializer):
         source='get_coding_language_display',
         read_only=True
     )
+    level_display = serializers.CharField(
+        source='get_level_display',
+        read_only=True
+    )
     lesson_count = serializers.SerializerMethodField()
     
     class Meta:
@@ -90,13 +94,17 @@ class SubcourseSerializer(serializers.ModelSerializer):
             'slug',
             'subtitle',
             'description',
+            'objective',
             'coding_language',
             'coding_language_display',
             'thumbnail_url',
             'status',
             'status_display',
             'sort_order',
-            'price',
+            'level',
+            'level_display',
+            'level_number',
+            'session_count',
             'lesson_count',
             'lessons',  # Nested lessons
             'created_at',
@@ -122,6 +130,10 @@ class SubcourseListSerializer(serializers.ModelSerializer):
         source='get_coding_language_display',
         read_only=True
     )
+    level_display = serializers.CharField(
+        source='get_level_display',
+        read_only=True
+    )
     lesson_count = serializers.SerializerMethodField()
     
     class Meta:
@@ -131,13 +143,18 @@ class SubcourseListSerializer(serializers.ModelSerializer):
             'title',
             'slug',
             'subtitle',
+            'description',
+            'objective',
             'coding_language',
             'coding_language_display',
             'thumbnail_url',
             'status',
             'status_display',
             'sort_order',
-            'price',
+            'level',
+            'level_display',
+            'level_number',
+            'session_count',
             'lesson_count',
         ]
         read_only_fields = ['id']

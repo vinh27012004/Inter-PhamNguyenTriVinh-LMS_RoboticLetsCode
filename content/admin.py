@@ -27,9 +27,11 @@ class SubcourseInline(admin.TabularInline):
         'title', 
         'slug', 
         'coding_language', 
+        'level',
+        'level_number',
+        'session_count',
         'status', 
         'sort_order',
-        'price',
     ]
     
     # Chỉ cho phép xem, không cho thêm/xóa trực tiếp (optional)
@@ -152,9 +154,11 @@ class SubcourseAdmin(admin.ModelAdmin):
         'title',
         'program',
         'coding_language',
+        'level',
+        'level_number',
+        'session_count',
         'status_badge',
         'sort_order',
-        'price_display',
         'lesson_count',
         'created_at',
     ]
@@ -170,6 +174,7 @@ class SubcourseAdmin(admin.ModelAdmin):
         'title',
         'subtitle',
         'description',
+        'objective',
         'program__title',
     ]
     
@@ -180,10 +185,10 @@ class SubcourseAdmin(admin.ModelAdmin):
             'fields': ('program',)
         }),
         ('Thông tin cơ bản', {
-            'fields': ('title', 'slug', 'subtitle', 'description')
+            'fields': ('title', 'slug', 'subtitle', 'description', 'objective')
         }),
         ('Cấu hình học tập', {
-            'fields': ('coding_language', 'price')
+            'fields': ('coding_language', 'level', 'level_number', 'session_count')
         }),
         ('Media & Hiển thị', {
             'fields': ('thumbnail_url', 'status', 'sort_order'),
@@ -212,13 +217,6 @@ class SubcourseAdmin(admin.ModelAdmin):
             obj.get_status_display()
         )
     status_badge.short_description = 'Trạng thái'
-    
-    def price_display(self, obj):
-        """Hiển thị giá tiền định dạng"""
-        if obj.price == 0:
-            return format_html('<span style="color: green;">Miễn phí</span>')
-        return f'{obj.price:,.0f} VNĐ'
-    price_display.short_description = 'Giá'
     
     def lesson_count(self, obj):
         """Hiển thị số lượng bài học"""

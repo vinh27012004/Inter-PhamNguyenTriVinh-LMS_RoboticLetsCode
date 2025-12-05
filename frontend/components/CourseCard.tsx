@@ -13,7 +13,7 @@ interface CourseCardProps {
   slug: string;
   title: string;
   description?: string;
-  thumbnail?: string;
+  thumbnail_url?: string;
   kit_type: 'SPIKE_ESSENTIAL' | 'SPIKE_PRIME';
   subcourse_count?: number;
   total_lessons?: number;
@@ -24,7 +24,7 @@ export default function CourseCard({
   slug,
   title,
   description,
-  thumbnail,
+  thumbnail_url,
   kit_type,
   subcourse_count,
   total_lessons,
@@ -51,13 +51,13 @@ export default function CourseCard({
   const Icon = config.icon;
 
   return (
-    <Link href={`/courses/${slug}`}>
+    <Link href={`/programs/${slug}`}>
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer group">
         {/* Thumbnail */}
         <div className="relative h-48 bg-gradient-to-br from-blue-50 to-purple-50 overflow-hidden">
-          {thumbnail ? (
+          {thumbnail_url ? (
             <img
-              src={thumbnail}
+              src={thumbnail_url}
               alt={title}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
             />

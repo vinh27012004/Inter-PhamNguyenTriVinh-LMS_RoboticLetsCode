@@ -99,7 +99,7 @@ export default function HomePage() {
                 slug={program.slug}
                 title={program.title}
                 description={program.description}
-                thumbnail={program.thumbnail_url}
+                thumbnail_url={program.thumbnail_url}
                 kit_type={program.kit_type}
                 subcourse_count={program.subcourse_count}
                 total_lessons={program.total_lessons || 0}

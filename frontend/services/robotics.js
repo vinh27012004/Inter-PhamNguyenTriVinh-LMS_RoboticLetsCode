@@ -173,10 +173,11 @@ export const getMyPrograms = async () => {
 /**
  * Lấy danh sách Subcourse IDs mà user có quyền truy cập
  * GET /api/auth/assignments/my_subcourses/
+ * @param {Object} params - Query params (program_id)
  */
-export const getMySubcourses = async () => {
+export const getMySubcourses = async (params = {}) => {
   try {
-    const response = await axiosInstance.get('/auth/assignments/my_subcourses/');
+    const response = await axiosInstance.get('/auth/assignments/my_subcourses/', { params });
     return response.data;
   } catch (error) {
     console.error('Error fetching my subcourses:', error);

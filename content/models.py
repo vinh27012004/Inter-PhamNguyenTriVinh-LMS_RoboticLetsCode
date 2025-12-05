@@ -83,6 +83,12 @@ class Subcourse(models.Model):
     """
     Khóa học con (Cấp độ 2) - Ví dụ: "Module 1: Làm quen với Robot"
     """
+    LEVEL_CHOICES = [
+        ('BEGINNER', 'Sơ cấp'),
+        ('INTERMEDIATE', 'Trung cấp'),
+        ('ADVANCED', 'Nâng cao'),
+    ]
+    
     CODING_LANGUAGE_CHOICES = [
         ('ICON_BLOCKS', 'Icon Blocks'),
         ('WORD_BLOCKS', 'Word Blocks'),
@@ -120,6 +126,11 @@ class Subcourse(models.Model):
         verbose_name='Mô tả',
         help_text='Mô tả chi tiết về khóa học con'
     )
+    objective = models.TextField(
+        blank=True,
+        verbose_name='Mục tiêu',
+        help_text='Mục tiêu học tập - những gì học viên sẽ đạt được'
+    )
     coding_language = models.CharField(
         max_length=50,
         choices=CODING_LANGUAGE_CHOICES,
@@ -144,14 +155,25 @@ class Subcourse(models.Model):
         verbose_name='Thứ tự sắp xếp'
     )
     
-    # Pricing (optional)
-    price = models.DecimalField(
-        max_digits=10,
-        decimal_places=0,
-        default=0,
-        validators=[MinValueValidator(0)],
-        verbose_name='Giá khóa học (VNĐ)',
-        help_text='Để 0 nếu miễn phí'
+    # Thông tin khóa học
+    level = models.CharField(
+        max_length=20,
+        choices=LEVEL_CHOICES,
+        default='BEGINNER',
+        verbose_name='Cấp độ',
+        help_text='Sơ cấp, Trung cấp, hoặc Nâng cao'
+    )
+    level_number = models.IntegerField(
+        default=1,
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+        verbose_name='Level',
+        help_text='Level 1, Level 2, Level 3, ...'
+    )
+    session_count = models.IntegerField(
+        default=20,
+        validators=[MinValueValidator(1)],
+        verbose_name='Số lượng buổi học',
+        help_text='Tổng số buổi học trong khóa học này'
     )
     
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Ngày tạo')
