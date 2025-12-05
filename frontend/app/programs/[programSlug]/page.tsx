@@ -152,7 +152,7 @@ export default function ProgramDetailPage() {
           <h2 className="text-2xl font-bold text-gray-800 mb-4">{error || 'Không tìm thấy dữ liệu'}</h2>
           <button
             onClick={() => router.push('/')}
-            className="px-6 py-3 bg-brandPurple-600 text-white rounded-lg hover:bg-brandPurple-700 transition-colors"
+            className="px-6 py-3 bg-brandPurple-600 text-white rounded-lg transition-all hover:bg-brandPurple-700 hover:shadow-md hover:-translate-y-0.5"
           >
             Quay lại trang chủ
           </button>
@@ -183,10 +183,10 @@ export default function ProgramDetailPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <button
             onClick={() => router.push('/')}
-            className="flex items-center text-brandPurple-600 hover:text-brandPurple-700 transition-colors"
+            className="group inline-flex items-center gap-2 px-3 py-2 rounded-lg text-brandPurple-600 transition-all hover:text-brandPurple-700 hover:bg-brandPurple-50 hover:-translate-x-0.5"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
-            Quay lại
+            Quay lại trang chủ
           </button>
         </div>
       </div>
@@ -294,18 +294,16 @@ export default function ProgramDetailPage() {
             </div>
           </div>
 
-          {/* Mascot Decoration */}
-          <div className="hidden lg:flex absolute bottom-0 left-0 opacity-20">
+            {/* Mascot Decoration - Bay lơ lửng tự do */}
+          <div className="hidden lg:flex fixed bottom-0 left-0 opacity-20 pointer-events-none">
             <Image
               src="/images/mascot/leco game 4.png"
               alt="Mascot"
               width={200}
               height={200}
-              className="animate-float"
+              className="animate-drift"
             />
-          </div>
-
-          {/* RIGHT COLUMN - Courses List */}
+          </div>          {/* RIGHT COLUMN - Courses List */}
           <div className="lg:w-2/3">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-900">Khóa học</h2>

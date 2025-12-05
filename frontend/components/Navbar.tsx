@@ -78,7 +78,7 @@ export default function Navbar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-white hover:bg-brandPurple-400 hover:text-white transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg text-white transition-all hover:bg-brandPurple-300/80 hover:text-white hover:-translate-y-0.5"
               >
                 <item.icon className="w-5 h-5" />
                 <span className="font-medium">{item.name}</span>
@@ -96,7 +96,7 @@ export default function Navbar() {
                   )}
                   <Link
                     href="/profile"
-                    className="p-2 rounded-full hover:bg-brandPurple-400 transition-colors"
+                    className="p-2 rounded-full transition-all hover:bg-brandPurple-300/70 hover:-translate-y-0.5"
                     title="Hồ sơ"
                   >
                     <User className="w-5 h-5 text-white" />
@@ -110,12 +110,12 @@ export default function Navbar() {
                   </button>
                 </>
               ) : (
-                <Link
-                  href="/login"
-                  className="px-4 py-2 bg-brandYellow-500 text-brandPurple-600 rounded-lg hover:bg-brandYellow-300 transition-colors font-medium"
-                >
-                  Đăng nhập
-                </Link>
+                  <Link
+                    href="/login"
+                    className="px-4 py-2 bg-brandYellow-500 text-brandPurple-600 rounded-lg transition-all hover:bg-brandYellow-300 hover:-translate-y-0.5 font-medium"
+                  >
+                    Đăng nhập
+                  </Link>
               )}
             </div>
           </div>
@@ -160,7 +160,7 @@ export default function Navbar() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="flex items-center space-x-3 px-4 py-3 rounded-lg text-white hover:bg-brandPurple-400 transition-colors"
+                  className="flex items-center space-x-3 px-4 py-3 rounded-lg text-white transition-all hover:bg-brandPurple-300/80 hover:-translate-y-0.5"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <item.icon className="w-5 h-5" />
@@ -178,7 +178,7 @@ export default function Navbar() {
                     )}
                     <Link
                       href="/profile"
-                      className="flex items-center space-x-3 px-4 py-3 rounded-lg text-white hover:bg-brandPurple-400 transition-colors"
+                      className="flex items-center space-x-3 px-4 py-3 rounded-lg text-white transition-all hover:bg-brandPurple-300/80 hover:-translate-y-0.5"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <User className="w-5 h-5" />

@@ -89,7 +89,7 @@ export default function LessonDetailPage() {
           <h2 className="text-2xl font-bold text-gray-800 mb-4">{error || 'Không tìm thấy dữ liệu'}</h2>
           <button
             onClick={() => router.push(`/programs/${programSlug}/subcourses/${subcourseSlug}`)}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-6 py-3 bg-brandPurple-600 text-white rounded-lg transition-all hover:bg-brandPurple-700 hover:shadow-md hover:-translate-y-0.5"
           >
             Quay lại khóa học
           </button>
@@ -105,13 +105,13 @@ export default function LessonDetailPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <button
             onClick={() => router.push(`/programs/${programSlug}/subcourses/${subcourseSlug}`)}
-            className="flex items-center text-blue-600 hover:text-blue-700 transition-colors mb-3"
+            className="group inline-flex items-center gap-2 px-3 py-2 rounded-lg text-brandPurple-600 transition-all hover:text-brandPurple-700 hover:bg-brandPurple-50 hover:-translate-x-0.5 mb-3"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
             Quay lại khóa học
           </button>
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-brandPurple-100 text-brandPurple-800">
               Bài {lesson.sort_order}
             </span>
             <h1 className="text-2xl font-bold text-gray-900">{lesson.title}</h1>
@@ -121,17 +121,6 @@ export default function LessonDetailPage() {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
-        {/* Mascot Decoration */}
-        <div className="absolute right-0 top-0 opacity-20 hidden lg:block">
-          <Image
-            src="/images/mascot/leco game 7.png"
-            alt="Mascot"
-            width={150}
-            height={150}
-            className="animate-float"
-          />
-        </div>
-
         {/* Main Content Area */}
         <div className="bg-white rounded-xl shadow-md p-8 space-y-8">
           {/* Lesson Objective */}

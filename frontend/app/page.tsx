@@ -49,26 +49,26 @@ export default function HomePage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Hero Section */}
       <div className="text-center mb-16 relative">
-        {/* Mascot Left */}
-        <div className="absolute left-0 top-0 -z-10 opacity-30 hidden lg:block">
+        {/* Mascot Left - Bay tự do quanh trang */}
+        <div className="fixed left-6 top-24 -z-10 opacity-30 hidden lg:block pointer-events-none">
           <Image
             src="/images/mascot/Asset 6 (2).png"
             alt="Mascot"
             width={140}
-            height={140}
-            className="animate-float"
+            height={110}
+            className="animate-roam"
           />
         </div>
 
-        {/* Mascot Right */}
-        <div className="absolute right-0 top-0 -z-10 opacity-30 hidden lg:block">
+        {/* Mascot Right - Bay tự do quanh trang */}
+        <div className="fixed right-6 bottom-16 -z-10 opacity-30 hidden lg:block pointer-events-none">
           <Image
             src="/images/mascot/Asset 7 (2).png"
             alt="Mascot"
-            width={140}
-            height={140}
-            className="animate-float"
-            style={{ animationDelay: '1s' }}
+            width={140} 
+            height={100}
+            className="animate-roamSlow"
+            style={{ animationDelay: '2s' }}
           />
         </div>
 
