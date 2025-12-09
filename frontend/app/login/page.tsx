@@ -42,6 +42,26 @@ export default function LoginPage() {
         localStorage.setItem('refresh_token', data.refresh);
         localStorage.setItem('username', formData.username);
 
+        // Lấy thông tin profile để biết role
+        try {
+          const profileResponse = await fetch('http://localhost:8000/api/auth/profile/me/', {
+            headers: {
+              'Authorization': `Bearer ${data.access}`,
+              'Content-Type': 'application/json',
+            },
+          });
+          
+          if (profileResponse.ok) {
+            const profileData = await profileResponse.json();
+            localStorage.setItem('user_role', profileData.role || 'STUDENT');
+          } else {
+            localStorage.setItem('user_role', 'STUDENT');
+          }
+        } catch (profileErr) {
+          console.error('Error fetching profile:', profileErr);
+          localStorage.setItem('user_role', 'STUDENT');
+        }
+
         // Redirect về trang chủ
         router.push('/');
         router.refresh();

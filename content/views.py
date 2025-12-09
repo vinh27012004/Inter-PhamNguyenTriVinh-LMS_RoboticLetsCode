@@ -79,7 +79,7 @@ class SubcourseViewSet(viewsets.ReadOnlyModelViewSet):
     - GET /api/subcourses/ - List tất cả subcourses (public)
     - GET /api/subcourses/{id}/ - Chi tiết 1 subcourse (requires authentication & authorization)
     """
-    lookup_field = 'slug'  # Sử dụng slug thay vì id để lookup
+    lookup_field = 'slug'  
     pagination_class = StandardResultsSetPagination
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['program', 'coding_language', 'status', 'slug']
@@ -125,7 +125,11 @@ class SubcourseViewSet(viewsets.ReadOnlyModelViewSet):
         instance = self.get_object()
         
         # ADMIN có quyền xem tất cả
-        if hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN':
+        if (
+            request.user.is_staff
+            or request.user.is_superuser
+            or (hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN')
+        ):
             serializer = self.get_serializer(instance)
             return Response(serializer.data)
         
@@ -214,7 +218,11 @@ class LessonViewSet(viewsets.ReadOnlyModelViewSet):
         instance = self.get_object()
         
         # ADMIN có quyền xem tất cả
-        if hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN':
+        if (
+            request.user.is_staff
+            or request.user.is_superuser
+            or (hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN')
+        ):
             serializer = self.get_serializer(instance)
             return Response(serializer.data)
         

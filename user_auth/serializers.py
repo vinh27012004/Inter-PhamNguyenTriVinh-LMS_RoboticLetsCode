@@ -169,9 +169,6 @@ class AuthAssignmentSerializer(serializers.ModelSerializer):
             'valid_from',  # start_at
             'valid_until',  # end_at
             
-            # Access code
-            'access_code',
-            
             # Metadata
             'assigned_by',
             'assigned_by_username',

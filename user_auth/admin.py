@@ -140,7 +140,6 @@ class AuthAssignmentAdmin(admin.ModelAdmin):
         'target_content',  # Program hoặc Subcourse
         'status_badge',
         'validity_period',  # Thời gian hiệu lực
-        'access_code',
         'created_at',
     ]
     
@@ -167,7 +166,6 @@ class AuthAssignmentAdmin(admin.ModelAdmin):
         'user__last_name',
         'program__title',
         'subcourse__title',
-        'access_code',
     ]
     
     # ========================================
@@ -188,13 +186,6 @@ class AuthAssignmentAdmin(admin.ModelAdmin):
                 'valid_from',
                 'valid_until',
             ),
-        }),
-        ('Mã truy cập', {
-            'fields': (
-                'access_code',
-            ),
-            'classes': ('collapse',),
-            'description': 'Mã code để kích hoạt quyền (tùy chọn)'
         }),
         ('Thông tin bổ sung', {
             'fields': (

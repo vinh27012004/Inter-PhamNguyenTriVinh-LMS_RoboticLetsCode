@@ -25,6 +25,8 @@ interface SubcourseCardProps {
   session_count: number;
   lesson_count: number;
   has_access?: boolean;
+  valid_from?: string | null;
+  valid_until?: string | null;
 }
 
 export default function SubcourseCard({
@@ -42,6 +44,8 @@ export default function SubcourseCard({
   session_count,
   lesson_count,
   has_access = true,
+  valid_from,
+  valid_until,
 }: SubcourseCardProps) {
   // Cấu hình màu cho cấp độ
   const levelConfig = {
@@ -84,6 +88,21 @@ export default function SubcourseCard({
   const levelCfg = levelConfig[level];
   const langCfg = languageConfig[coding_language];
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Xử lý định dạng ngày tháng
+  const formatDate = (value?: string | null) => {
+    if (!value) return null;
+    try {
+      const parsed = new Date(value);
+      if (Number.isNaN(parsed.getTime())) return null;
+      return parsed.toLocaleDateString('vi-VN');
+    } catch {
+      return null;
+    }
+  };
+
+  const formattedFrom = formatDate(valid_from);
+  const formattedUntil = formatDate(valid_until);
 
   // Xử lý không có quyền truy cập
   if (!has_access) {
@@ -315,6 +334,26 @@ export default function SubcourseCard({
               {langCfg.label}
             </span>
           </div>
+
+          {/* Validity Period */}
+          {(formattedFrom || formattedUntil) && (
+            <div className="flex items-center gap-2 text-xs text-gray-600 mb-3">
+              <svg
+                className="w-3 h-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              <span>{formattedFrom || '—'} → {formattedUntil || 'Vô thời hạn'}</span>
+            </div>
+          )}
 
           {/* Stats - Bài học & Buổi học */}
           <div className="space-y-2 text-xs">

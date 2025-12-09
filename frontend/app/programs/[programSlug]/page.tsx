@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getProgramDetail, getMySubcourses, getSubcourses } from '@/services/robotics';
+import { getProgramDetail, getMySubcourses, getSubcourses, getAssignedModules } from '@/services/robotics';
 import { ArrowLeft, BookOpen, Clock, Users, Lock, ChevronDown, ChevronUp } from 'lucide-react';
 import Image from 'next/image';
 import SubcourseCard from '@/components/SubcourseCard';
@@ -38,6 +38,8 @@ interface Subcourse {
   session_count: number;
   lesson_count: number;
   has_access?: boolean;
+  valid_from?: string | null;
+  valid_until?: string | null;
 }
 
 export default function ProgramDetailPage() {
@@ -57,6 +59,8 @@ export default function ProgramDetailPage() {
     const fetchData = async () => {
       try {
         setLoading(true);
+        const validityMap = new Map<number, { valid_from?: string; valid_until?: string }>();
+        let programValidity: { valid_from?: string; valid_until?: string } | null = null;
 
         // Lấy thông tin program
         const programData = await getProgramDetail(programSlug);
@@ -77,7 +81,9 @@ export default function ProgramDetailPage() {
             const subcoursesData = await getSubcourses({ program: programData.id });
             const allSubcourses = (subcoursesData.results || []).map((sc: Subcourse) => ({
               ...sc,
-              has_access: true
+              has_access: true,
+              valid_from: null,
+              valid_until: null,
             }));
             setSubcourses(allSubcourses);
           } else {
@@ -85,18 +91,48 @@ export default function ProgramDetailPage() {
             try {
               const mySubcoursesData = await getMySubcourses({ program_id: programData.id });
               const subcourseIds = mySubcoursesData.subcourse_ids || [];
+
+              // Lấy danh sách assignment để hiển thị thời gian hiệu lực
+              try {
+                const assignmentsData = await getAssignedModules({ program: programData.id });
+                const assignments = assignmentsData?.results || assignmentsData || [];
+                assignments.forEach((assignment: any) => {
+                  const target = assignment.target_content;
+                  if (target?.type === 'subcourse' && target.id) {
+                    validityMap.set(target.id, {
+                      valid_from: assignment.valid_from,
+                      valid_until: assignment.valid_until,
+                    });
+                  } else if (target?.type === 'program') {
+                    programValidity = {
+                      valid_from: assignment.valid_from,
+                      valid_until: assignment.valid_until,
+                    };
+                  }
+                });
+              } catch (assignmentErr) {
+                console.error('Error fetching assignment validity:', assignmentErr);
+              }
               
               const subcoursesData = await getSubcourses({ program: programData.id });
               
               const allSubcourses = (subcoursesData.results || []).map((sc: Subcourse) => ({
                 ...sc,
-                has_access: subcourseIds.includes(sc.id)
+                has_access: subcourseIds.includes(sc.id),
+                valid_from: validityMap.get(sc.id)?.valid_from || programValidity?.valid_from || null,
+                valid_until: validityMap.get(sc.id)?.valid_until || programValidity?.valid_until || null,
               }));
               setSubcourses(allSubcourses);
             } catch (err) {
               console.error('Error fetching my subcourses:', err);
               const subcoursesData = await getSubcourses({ program: programData.id });
-              setSubcourses(subcoursesData.results || []);
+              const allSubcourses = (subcoursesData.results || []).map((sc: Subcourse) => ({
+                ...sc,
+                has_access: false,
+                valid_from: null,
+                valid_until: null,
+              }));
+              setSubcourses(allSubcourses);
             }
           }
         } else {
@@ -104,7 +140,9 @@ export default function ProgramDetailPage() {
           const subcoursesData = await getSubcourses({ program: programData.id });
           const allSubcourses = (subcoursesData.results || []).map((sc: Subcourse) => ({
             ...sc,
-            has_access: false
+            has_access: false,
+            valid_from: null,
+            valid_until: null,
           }));
           setSubcourses(allSubcourses);
         }
@@ -329,6 +367,8 @@ export default function ProgramDetailPage() {
                     session_count={subcourse.session_count}
                     lesson_count={subcourse.lesson_count}
                     has_access={subcourse.has_access || isAdmin}
+                    valid_from={subcourse.valid_from}
+                    valid_until={subcourse.valid_until}
                   />
                 ))}
               </div>

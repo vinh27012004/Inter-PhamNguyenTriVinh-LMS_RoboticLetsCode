@@ -110,13 +110,6 @@ class AuthAssignment(models.Model):
         verbose_name='Trạng thái',
         db_index=True
     )
-    access_code = models.CharField(
-        max_length=50,
-        blank=True,
-        verbose_name='Mã truy cập',
-        help_text='Mã code để kích hoạt quyền truy cập (nếu có)'
-    )
-    
     # Thời gian hiệu lực
     valid_from = models.DateTimeField(
         default=timezone.now,
