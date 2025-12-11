@@ -366,7 +366,6 @@ export default function SubcourseDetailPage() {
                           icon="🎯"
                           bgGradient="from-brandPurple-50 to-brandYellow-50"
                           borderColor="border-brandPurple-200"
-                          textColor="text-brandPurple-700"
                         />
 
                         <LessonInfoCard
@@ -375,7 +374,6 @@ export default function SubcourseDetailPage() {
                           icon="💡"
                           bgGradient="from-brandYellow-50 to-brandPurple-50"
                           borderColor="border-brandYellow-200"
-                          textColor="text-brandYellow-700"
                         />
 
                         <LessonInfoCard
@@ -384,7 +382,6 @@ export default function SubcourseDetailPage() {
                           icon="📚"
                           bgGradient="from-brandPurple-50 to-brandYellow-50"
                           borderColor="border-brandPurple-200"
-                          textColor="text-brandPurple-700"
                         />
 
                         {/* Button vào học */}

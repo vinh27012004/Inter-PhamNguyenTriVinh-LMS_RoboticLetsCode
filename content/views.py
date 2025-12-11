@@ -11,7 +11,13 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from django.db import models
 
-from .models import Program, Subcourse, Lesson, UserProgress
+from .models import (
+    Program, Subcourse, Lesson, UserProgress,
+    Media, LessonObjective, LessonModel, Preparation,
+    BuildBlock, LessonContentBlock, LessonAttachment,
+    Challenge, Quiz, QuizQuestion, QuestionOption,
+    QuizSubmission, QuizAnswer
+)
 from .serializers import (
     ProgramSerializer,
     ProgramListSerializer,
@@ -20,6 +26,21 @@ from .serializers import (
     LessonSerializer,
     LessonListSerializer,
     UserProgressSerializer,
+    MediaSerializer,
+    LessonObjectiveSerializer,
+    LessonModelSerializer,
+    PreparationSerializer,
+    BuildBlockSerializer,
+    LessonContentBlockSerializer,
+    LessonAttachmentSerializer,
+    ChallengeSerializer,
+    QuizListSerializer,
+    QuizDetailSerializer,
+    QuizQuestionSerializer,
+    QuestionOptionSerializer,
+    QuizSubmissionSerializer,
+    QuizAnswerSerializer,
+    LessonDetailSerializer,
 )
 
 
@@ -303,4 +324,377 @@ class UserProgressViewSet(viewsets.ReadOnlyModelViewSet):
             'lesson',
             'lesson__subcourse',
             'lesson__subcourse__program'
+        )
+
+
+# ========================
+# Media & Resource ViewSets
+# ========================
+
+class MediaViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet cho Media (Tài nguyên chia sẻ)
+    Read-only: Admin quản lý qua admin panel
+    
+    Endpoints:
+    - GET /api/media/ - List tất cả media
+    - GET /api/media/{id}/ - Chi tiết 1 media item
+    """
+    serializer_class = MediaSerializer
+    permission_classes = [AllowAny]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['media_type', 'is_featured']
+    search_fields = ['title', 'description', 'tags']
+    ordering_fields = ['created_at', 'title']
+    ordering = ['-created_at']
+    
+    def get_queryset(self):
+        """Tất cả media items"""
+        return Media.objects.all()
+
+
+# ========================
+# Lesson Content ViewSets
+# ========================
+
+class LessonObjectiveViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet cho LessonObjective (Mục tiêu bài học)
+    Read-only: Quản lý qua admin panel hoặc Lesson API
+    
+    Endpoints:
+    - GET /api/objectives/ - List objectives (filtered by lesson)
+    - GET /api/objectives/{id}/ - Chi tiết 1 objective
+    """
+    serializer_class = LessonObjectiveSerializer
+    permission_classes = [AllowAny]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['lesson', 'objective_type']
+    search_fields = ['objective_text']
+    ordering_fields = ['sort_order', 'created_at']
+    ordering = ['lesson', 'sort_order']
+    
+    def get_queryset(self):
+        """Objectives của published lessons"""
+        return LessonObjective.objects.filter(
+            lesson__status='PUBLISHED'
+        ).select_related('lesson')
+
+
+class LessonModelViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet cho LessonModel (Mô hình thiết kế)
+    
+    Endpoints:
+    - GET /api/models/ - List models (filtered by lesson)
+    - GET /api/models/{id}/ - Chi tiết 1 model
+    """
+    serializer_class = LessonModelSerializer
+    permission_classes = [AllowAny]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['lesson']
+    search_fields = ['model_name', 'description']
+    ordering_fields = ['sort_order', 'created_at']
+    ordering = ['lesson', 'sort_order']
+    
+    def get_queryset(self):
+        """Models của published lessons với prefetch media"""
+        return LessonModel.objects.filter(
+            lesson__status='PUBLISHED'
+        ).select_related('lesson').prefetch_related('media')
+
+
+class PreparationViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet cho Preparation (Chuẩn bị)
+    
+    Endpoints:
+    - GET /api/preparations/ - List preparations (filtered by lesson)
+    - GET /api/preparations/{id}/ - Chi tiết
+    """
+    serializer_class = PreparationSerializer
+    permission_classes = [AllowAny]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['lesson']
+    search_fields = ['item_name', 'description', 'notes']
+    ordering_fields = ['sort_order', 'created_at']
+    ordering = ['lesson', 'sort_order']
+    
+    def get_queryset(self):
+        """Preparations của published lessons với prefetch media"""
+        return Preparation.objects.filter(
+            lesson__status='PUBLISHED'
+        ).select_related('lesson').prefetch_related('media')
+
+
+class BuildBlockViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet cho BuildBlock (Khối xây dựng)
+    
+    Endpoints:
+    - GET /api/build-blocks/ - List build blocks (filtered by lesson)
+    - GET /api/build-blocks/{id}/ - Chi tiết
+    """
+    serializer_class = BuildBlockSerializer
+    permission_classes = [AllowAny]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['lesson', 'block_type']
+    search_fields = ['title', 'description', 'code_snippet']
+    ordering_fields = ['sort_order', 'created_at']
+    ordering = ['lesson', 'sort_order']
+    
+    def get_queryset(self):
+        """Build blocks của published lessons với prefetch media"""
+        return BuildBlock.objects.filter(
+            lesson__status='PUBLISHED'
+        ).select_related('lesson').prefetch_related('media')
+
+
+class LessonContentBlockViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet cho LessonContentBlock (Nội dung bài học)
+    
+    Endpoints:
+    - GET /api/content-blocks/ - List content blocks (filtered by lesson)
+    - GET /api/content-blocks/{id}/ - Chi tiết
+    """
+    serializer_class = LessonContentBlockSerializer
+    permission_classes = [AllowAny]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['lesson', 'block_type']
+    search_fields = ['title', 'content_text', 'code_snippet']
+    ordering_fields = ['sort_order', 'created_at']
+    ordering = ['lesson', 'sort_order']
+    
+    def get_queryset(self):
+        """Content blocks của published lessons với prefetch media"""
+        return LessonContentBlock.objects.filter(
+            lesson__status='PUBLISHED'
+        ).select_related('lesson').prefetch_related('media')
+
+
+class LessonAttachmentViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet cho LessonAttachment (File đính kèm)
+    
+    Endpoints:
+    - GET /api/attachments/ - List attachments (filtered by lesson)
+    - GET /api/attachments/{id}/ - Chi tiết
+    """
+    serializer_class = LessonAttachmentSerializer
+    permission_classes = [AllowAny]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['lesson', 'file_type']
+    search_fields = ['file_name', 'description']
+    ordering_fields = ['sort_order', 'created_at']
+    ordering = ['lesson', 'sort_order']
+    
+    def get_queryset(self):
+        """Attachments của published lessons"""
+        return LessonAttachment.objects.filter(
+            lesson__status='PUBLISHED'
+        ).select_related('lesson')
+
+
+class ChallengeViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet cho Challenge (Thử thách)
+    
+    Endpoints:
+    - GET /api/challenges/ - List challenges (filtered by lesson)
+    - GET /api/challenges/{id}/ - Chi tiết
+    """
+    serializer_class = ChallengeSerializer
+    permission_classes = [AllowAny]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['lesson', 'difficulty_level']
+    search_fields = ['challenge_title', 'description', 'hint']
+    ordering_fields = ['sort_order', 'created_at']
+    ordering = ['lesson', 'sort_order']
+    
+    def get_queryset(self):
+        """Challenges của published lessons với prefetch media"""
+        return Challenge.objects.filter(
+            lesson__status='PUBLISHED'
+        ).select_related('lesson').prefetch_related('media')
+
+
+# ========================
+# Quiz & Assessment ViewSets
+# ========================
+
+class QuizViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet cho Quiz (Bài kiểm tra)
+    
+    Endpoints:
+    - GET /api/quizzes/ - List quizzes (filtered by lesson)
+    - GET /api/quizzes/{id}/ - Chi tiết quiz với questions
+    - POST /api/quizzes/{id}/submit/ - Nộp bài (tạo submission)
+    """
+    permission_classes = [AllowAny]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['lesson', 'quiz_type']
+    search_fields = ['quiz_title', 'description']
+    ordering_fields = ['sort_order', 'created_at']
+    ordering = ['lesson', 'sort_order']
+    
+    def get_queryset(self):
+        """Quizzes của published lessons với prefetch questions"""
+        return Quiz.objects.filter(
+            lesson__status='PUBLISHED'
+        ).select_related('lesson').prefetch_related(
+            'questions',
+            'questions__options'
+        )
+    
+    def get_serializer_class(self):
+        """
+        List: Rút gọn (không có questions)
+        Detail: Đầy đủ (có questions & options)
+        """
+        if self.action == 'list':
+            return QuizListSerializer
+        return QuizDetailSerializer
+    
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def submit(self, request, pk=None):
+        """
+        Custom action: Nộp bài quiz
+        POST /api/quizzes/{id}/submit/
+        Body: {
+            "answers": [
+                {"question_id": 1, "selected_option_id": 3},
+                {"question_id": 2, "selected_option_id": 7}
+            ]
+        }
+        """
+        quiz = self.get_object()
+        user = request.user
+        answers_data = request.data.get('answers', [])
+        
+        # Tạo QuizSubmission
+        from django.utils import timezone
+        submission = QuizSubmission.objects.create(
+            user=user,
+            quiz=quiz,
+            submitted_at=timezone.now()
+        )
+        
+        # Tạo QuizAnswers và tính điểm
+        correct_count = 0
+        total_questions = 0
+        
+        for answer_data in answers_data:
+            question_id = answer_data.get('question_id')
+            selected_option_id = answer_data.get('selected_option_id')
+            
+            if not question_id or not selected_option_id:
+                continue
+            
+            try:
+                question = QuizQuestion.objects.get(id=question_id, quiz=quiz)
+                selected_option = QuestionOption.objects.get(id=selected_option_id, question=question)
+                
+                QuizAnswer.objects.create(
+                    submission=submission,
+                    question=question,
+                    selected_option=selected_option
+                )
+                
+                total_questions += 1
+                if selected_option.is_correct:
+                    correct_count += 1
+                    
+            except (QuizQuestion.DoesNotExist, QuestionOption.DoesNotExist):
+                continue
+        
+        # Tính điểm
+        if total_questions > 0:
+            submission.score = (correct_count / total_questions) * 100
+            submission.is_passed = submission.score >= quiz.passing_score
+            submission.save()
+        
+        serializer = QuizSubmissionSerializer(submission)
+        return Response(serializer.data)
+
+
+class QuizSubmissionViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet cho QuizSubmission (Lần nộp bài)
+    Chỉ xem submissions của chính user
+    
+    Endpoints:
+    - GET /api/quiz-submissions/ - Submissions của user hiện tại
+    - GET /api/quiz-submissions/{id}/ - Chi tiết 1 submission
+    """
+    serializer_class = QuizSubmissionSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ['quiz', 'is_passed']
+    ordering_fields = ['submitted_at', 'score']
+    ordering = ['-submitted_at']
+    
+    def get_queryset(self):
+        """Chỉ submissions của user hiện tại"""
+        return QuizSubmission.objects.filter(
+            user=self.request.user
+        ).select_related('quiz', 'quiz__lesson').prefetch_related(
+            'answers',
+            'answers__question',
+            'answers__selected_option'
+        )
+
+
+# ========================
+# Composite Lesson ViewSet
+# ========================
+
+class LessonDetailViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet cho Lesson Detail với TẤT CẢ nội dung lồng nhau
+    (Objectives, Models, Preparations, BuildBlocks, ContentBlocks, Attachments, Challenges, Quizzes)
+    
+    Endpoints:
+    - GET /api/lesson-details/ - List lessons với full content
+    - GET /api/lesson-details/{slug}/ - Chi tiết 1 lesson với full content
+    """
+    serializer_class = LessonDetailSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'slug'
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['subcourse', 'status']
+    search_fields = ['title', 'subtitle', 'objective']
+    ordering_fields = ['sort_order', 'created_at']
+    ordering = ['subcourse', 'sort_order']
+    
+    def get_queryset(self):
+        """
+        Lessons với full prefetch để tránh N+1 queries
+        """
+        return Lesson.objects.filter(
+            status='PUBLISHED',
+            subcourse__status='PUBLISHED'
+        ).select_related(
+            'subcourse',
+            'subcourse__program'
+        ).prefetch_related(
+            'objectives',
+            'models', 'models__media',
+            'preparations', 'preparations__media',
+            'build_blocks', 'build_blocks__media',
+            'content_blocks', 'content_blocks__media',
+            'attachments',
+            'challenges', 'challenges__media',
+            'quizzes', 'quizzes__questions', 'quizzes__questions__options'
         )

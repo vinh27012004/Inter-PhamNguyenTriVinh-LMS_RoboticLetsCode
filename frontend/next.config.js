@@ -3,10 +3,8 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'letscode-roboticsspike.netlify.app',
-        port: '',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "s3.cloudfly.vn",
       },
       {
         protocol: 'https',

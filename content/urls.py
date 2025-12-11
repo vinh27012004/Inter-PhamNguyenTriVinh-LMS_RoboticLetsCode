@@ -9,29 +9,48 @@ from .views import (
     SubcourseViewSet,
     LessonViewSet,
     UserProgressViewSet,
+    MediaViewSet,
+    LessonObjectiveViewSet,
+    LessonModelViewSet,
+    PreparationViewSet,
+    BuildBlockViewSet,
+    LessonContentBlockViewSet,
+    LessonAttachmentViewSet,
+    ChallengeViewSet,
+    QuizViewSet,
+    QuizSubmissionViewSet,
+    LessonDetailViewSet,
 )
 
 # Tạo router cho DRF
 router = DefaultRouter()
 
-# Đăng ký ViewSets
+# Đăng ký ViewSets - Core Content
 router.register(r'programs', ProgramViewSet, basename='program')
 router.register(r'subcourses', SubcourseViewSet, basename='subcourse')
 router.register(r'lessons', LessonViewSet, basename='lesson')
 router.register(r'progress', UserProgressViewSet, basename='userprogress')
 
+# Media & Resources
+router.register(r'media', MediaViewSet, basename='media')
+
+# Lesson Content Components
+router.register(r'objectives', LessonObjectiveViewSet, basename='lessonobjective')
+router.register(r'models', LessonModelViewSet, basename='lessonmodel')
+router.register(r'preparations', PreparationViewSet, basename='preparation')
+router.register(r'build-blocks', BuildBlockViewSet, basename='buildblock')
+router.register(r'content-blocks', LessonContentBlockViewSet, basename='lessoncontentblock')
+router.register(r'attachments', LessonAttachmentViewSet, basename='lessonattachment')
+router.register(r'challenges', ChallengeViewSet, basename='challenge')
+
+# Quiz & Assessments
+router.register(r'quizzes', QuizViewSet, basename='quiz')
+router.register(r'quiz-submissions', QuizSubmissionViewSet, basename='quizsubmission')
+
+# Composite Endpoint (Full Lesson Detail)
+router.register(r'lesson-details', LessonDetailViewSet, basename='lessondetail')
+
 # URL patterns
 urlpatterns = [
     path('', include(router.urls)),
 ]
-
-# API Endpoints được tạo ra:
-# /api/content/programs/ - List all programs
-# /api/content/programs/{id}/ - Program detail
-# /api/content/subcourses/ - List all subcourses
-# /api/content/subcourses/{id}/ - Subcourse detail
-# /api/content/lessons/ - List all lessons
-# /api/content/lessons/{id}/ - Lesson detail
-# /api/content/lessons/{id}/mark_complete/ - POST để đánh dấu hoàn thành
-# /api/content/progress/ - User's learning progress
-# /api/content/progress/{id}/ - Progress detail

@@ -96,6 +96,21 @@ export const getLessonDetail = async (slug) => {
 };
 
 /**
+ * Lấy chi tiết FULL Lesson (với tất cả content blocks)
+ * GET /api/content/lesson-details/{slug}/
+ * RECOMMENDED: Dùng endpoint này thay vì getLessonDetail để lấy full content
+ */
+export const getLessonFullDetail = async (slug) => {
+  try {
+    const response = await axiosInstance.get(`/content/lesson-details/${slug}/`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching full lesson detail ${slug}:`, error);
+    throw error;
+  }
+};
+
+/**
  * Đánh dấu lesson hoàn thành
  * POST /api/content/lessons/{id}/mark_complete/
  */

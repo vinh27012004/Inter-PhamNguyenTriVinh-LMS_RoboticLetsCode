@@ -161,28 +161,6 @@ export default function ProgramDetailPage() {
     fetchData();
   }, [programSlug]);
 
-  const handleSubcourseClick = (subcourseSlug: string, hasAccess: boolean) => {
-    if (!isAuthenticated) {
-      router.push('/login');
-      return;
-    }
-    if (!hasAccess && !isAdmin) {
-      return;
-    }
-    router.push(`/programs/${programSlug}/subcourses/${subcourseSlug}`);
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-brandPurple-50 to-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-brandPurple-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Đang tải...</p>
-        </div>
-      </div>
-    );
-  }
-
   if (error || !program) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-brandPurple-50 to-white flex items-center justify-center">
