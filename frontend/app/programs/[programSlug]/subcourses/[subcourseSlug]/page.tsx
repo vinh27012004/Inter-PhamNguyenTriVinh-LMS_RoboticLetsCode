@@ -10,18 +10,21 @@ import { useParams, useRouter } from 'next/navigation';
 import { getSubcourseDetail, getLessons } from '@/services/robotics';
 import { ArrowLeft, BookOpen, Code, DollarSign, Clock, Target, CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
+import LessonInfoCard from '@/components/LessonInfoCard';
 
 interface Lesson {
   id: number;
   slug: string;
   title: string;
   objective: string;
+  knowledge_skills: string;
   content_text: string;
   sort_order: number;
   status: string;
   status_display: string;
   created_at: string;
   updated_at: string;
+  
 }
 
 interface Subcourse {
@@ -55,6 +58,7 @@ export default function SubcourseDetailPage() {
   const [subcourse, setSubcourse] = useState<Subcourse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [expandedLesson, setExpandedLesson] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,7 +74,7 @@ export default function SubcourseDetailPage() {
         }
 
         // Lấy chi tiết subcourse bằng slug
-        const { getSubcourses } = await import('@/services/robotics');
+        const { getSubcourses, getLessonDetail } = await import('@/services/robotics');
         console.log('Fetching subcourse with slug:', subcourseSlug);
         const subcoursesData = await getSubcourses({ slug: subcourseSlug });
         console.log('Subcourses data:', subcoursesData);
@@ -86,8 +90,24 @@ export default function SubcourseDetailPage() {
           });
           console.log('Lessons data:', lessonsData);
           
+          // Fetch detailed info for each lesson
+          const lessonsWithDetails = await Promise.all(
+            (lessonsData.results || []).map(async (lesson: any) => {
+              try {
+                const detailData = await getLessonDetail(lesson.slug);
+                console.log(`Lesson detail ${lesson.slug}:`, detailData);
+                return detailData;
+              } catch (err) {
+                console.error(`Error fetching lesson ${lesson.slug}:`, err);
+                return lesson; // Fallback to basic lesson data
+              }
+            })
+          );
+          
+          console.log('Lessons with details:', lessonsWithDetails);
+          
           // Add lessons to subcourse object
-          selectedSubcourse.lessons = lessonsData.results || [];
+          selectedSubcourse.lessons = lessonsWithDetails;
           
           setSubcourse(selectedSubcourse);
         } else {
@@ -289,43 +309,97 @@ export default function SubcourseDetailPage() {
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-900">Danh sách bài học</h2>
             </div>
-
             {subcourse.lessons && subcourse.lessons.length > 0 ? (
               <div className="space-y-4">
                 {subcourse.lessons.map((lesson) => (
                   <div
                     key={lesson.id}
-                    onClick={() => handleLessonClick(lesson.slug)}
-                    className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 hover:shadow-xl transition-all cursor-pointer transform hover:-translate-y-1"
+                    className={`bg-white rounded-2xl shadow-lg overflow-hidden border-2 transition-all duration-300 ${
+                      expandedLesson === lesson.id 
+                        ? 'border-brandPurple-400 shadow-2xl' 
+                        : 'border-gray-100 hover:border-brandPurple-200 hover:shadow-xl'
+                    }`}
                   >
-                    <div className="p-6">
-                      <div className="flex items-start justify-between">
+                    <div 
+                      className={`p-6 cursor-pointer transition-all duration-300 ${
+                        expandedLesson === lesson.id
+                          ? 'bg-gradient-to-r from-brandPurple-50 to-brandYellow-50'
+                          : 'hover:bg-gradient-to-r hover:from-brandPurple-50/40 hover:to-brandYellow-50/40'
+                      }`}
+                      onClick={() => setExpandedLesson(expandedLesson === lesson.id ? null : lesson.id)}
+                    >
+                      <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4 flex-1">
-                          {/* Lesson number badge */}
-                          <div className="flex-shrink-0 w-12 h-12 rounded-full bg-brandPurple-100 text-brandPurple-600 flex items-center justify-center font-bold text-lg">
-                            {lesson.sort_order}
-                          </div>
-                          
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900 mb-2 text-lg">
-                              {lesson.title}
-                            </h3>
-                            
-                            {/* Metadata */}
-                            <div className="flex flex-wrap gap-3 text-sm text-gray-600">
-                              {lesson.objective && (
-                                <div className="flex items-center text-gray-600 line-clamp-1">
-                                  <span>{lesson.objective}</span>
-                                </div>
-                              )}
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-br from-brandPurple-500 to-brandPurple-600 rounded-full blur-md opacity-50"></div>
+                            <div className="relative flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-brandPurple-500 to-brandPurple-600 text-brandPurple-300 flex items-center justify-center font-bold text-xl shadow-lg">
+                              {lesson.sort_order}
                             </div>
                           </div>
+                          <div className="flex-1">
+                            <h3 className="font-bold text-gray-700 text-xl mb-1">
+                              {lesson.title}
+                            </h3>
+                            <p className="text-sm text-gray-500">
+                              {expandedLesson === lesson.id ? 'Nhấn để thu gọn' : 'Nhấn để xem chi tiết'}
+                            </p>
+                          </div>
                         </div>
-
-                        {/* Arrow icon */}
-                        <ArrowLeft className="w-6 h-6 text-gray-400 transform rotate-180 flex-shrink-0 ml-4" />
+                        <div className={`flex-shrink-0 ml-4 p-2 rounded-full transition-all duration-300 ${
+                          expandedLesson === lesson.id 
+                            ? 'bg-brandPurple-100' 
+                            : 'bg-gray-100 group-hover:bg-brandPurple-50'
+                        }`}>
+                          <ArrowLeft className={`w-6 h-6 text-brandPurple-600 transform transition-transform duration-300 ${
+                            expandedLesson === lesson.id ? 'rotate-90' : 'rotate-180'
+                          }`} />
+                        </div>
                       </div>
                     </div>
+                    
+                    {/* Expandable content */}
+                    {expandedLesson === lesson.id && (
+                      <div className="px-6 pb-6 space-y-4 bg-gradient-to-b from-gray-50/50 to-white pt-6">
+                        <LessonInfoCard
+                          title="Mục tiêu bài học"
+                          content={lesson.objective}
+                          icon="🎯"
+                          bgGradient="from-brandPurple-50 to-brandYellow-50"
+                          borderColor="border-brandPurple-200"
+                          textColor="text-brandPurple-700"
+                        />
+
+                        <LessonInfoCard
+                          title="Kiến thức & Kỹ năng"
+                          content={lesson.knowledge_skills}
+                          icon="💡"
+                          bgGradient="from-brandYellow-50 to-brandPurple-50"
+                          borderColor="border-brandYellow-200"
+                          textColor="text-brandYellow-700"
+                        />
+
+                        <LessonInfoCard
+                          title="Nội dung bài học"
+                          content={lesson.content_text}
+                          icon="📚"
+                          bgGradient="from-brandPurple-50 to-brandYellow-50"
+                          borderColor="border-brandPurple-200"
+                          textColor="text-brandPurple-700"
+                        />
+
+                        {/* Button vào học */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleLessonClick(lesson.slug);
+                          }}
+                          className="w-full mt-4 px-6 py-4 bg-gradient-to-r from-brandPurple-600 to-brandPurple-700 text-white rounded-xl font-bold text-lg hover:from-brandPurple-700 hover:to-brandPurple-800 transition-all shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 group"
+                        >
+                          Vào học ngay 
+                          <span className="transform transition-transform group-hover:translate-x-1">→</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

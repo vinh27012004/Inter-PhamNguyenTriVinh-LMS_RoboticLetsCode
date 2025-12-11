@@ -202,7 +202,6 @@ class Lesson(models.Model):
         ('PUBLISHED', 'Đã xuất bản'),
         ('ARCHIVED', 'Đã lưu trữ'),
     ]
-
     subcourse = models.ForeignKey(
         Subcourse,
         on_delete=models.CASCADE,

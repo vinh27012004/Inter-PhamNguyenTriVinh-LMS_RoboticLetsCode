@@ -10,7 +10,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { getLessons } from '@/services/robotics';
 import { ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
-import LessonInfoCard from '@/components/LessonInfoCard';
 
 interface Lesson {
   id: number;
@@ -118,34 +117,6 @@ export default function LessonDetailPage() {
             <h1 className="text-2xl font-bold text-gray-900">{lesson.title}</h1>
           </div>
         </div>
-      </div>
-
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        <LessonInfoCard
-          title="🎯 Mục tiêu bài học"
-          content={lesson.objective}
-          bgGradient="from-brandPurple-50 to-brandYellow-50"
-          borderColor="border-brandPurple-200"
-          iconBgColor="bg-brandPurple-100"
-          defaultExpanded={false}
-        />
-        <LessonInfoCard
-          title="💡 Kiến thức & Kỹ năng"
-          content={lesson.knowledge_skills}
-          bgGradient="from-brandYellow-50 to-brandPurple-50"
-          borderColor="border-brandYellow-200"
-          iconBgColor="bg-brandYellow-100"
-          defaultExpanded={false}
-        />
-        <LessonInfoCard
-          title="📚 Nội dung bài học"
-          content={lesson.content_text}
-          bgGradient="from-brandPurple-50 to-brandYellow-50"
-          borderColor="border-brandPurple-200"
-          iconBgColor="bg-brandPurple-100"
-          defaultExpanded={false}
-        />
       </div>
     </div>
   );
