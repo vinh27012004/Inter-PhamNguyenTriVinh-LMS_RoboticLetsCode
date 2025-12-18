@@ -15,6 +15,7 @@ urlpatterns = [
     # REST API Endpoints
     path('api/content/', include('content.urls')),
     path('api/auth/', include('user_auth.urls')),
+    path('api/', include('classes.urls')),  # Classes management
     
     # JWT Authentication
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -48,6 +49,15 @@ urlpatterns = [
 # /api/auth/profile/me/ - Profile của user hiện tại
 # /api/auth/assignments/ - Quyền truy cập của user
 # /api/auth/assignments/my_programs/ - Program IDs có quyền
+#
+# CLASSES API:
+# /api/classes/ - Danh sách lớp học (filtered by role)
+# /api/classes/{id}/ - Chi tiết lớp
+# /api/classes/{id}/students/ - Danh sách học viên
+# /api/classes/{id}/progress/ - Tiến độ học viên trong lớp
+# /api/classes/{id}/enroll_student/ - Ghi danh học viên (admin/teacher)
+# /api/enrollments/ - Danh sách ghi danh
+# /api/progress/ - Tiến độ học tập
 # /api/auth/assignments/my_subcourses/ - Subcourse IDs có quyền
 # /api/auth/me/ - Thông tin user đầy đủ
 # /api/auth/me/info/ - GET user info

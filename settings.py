@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     # Your apps
     'content.apps.ContentConfig',
     'user_auth.apps.UserAuthConfig',
+    'classes.apps.ClassesConfig',
     
     # Third party
     'rest_framework',
