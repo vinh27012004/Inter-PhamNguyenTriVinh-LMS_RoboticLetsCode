@@ -1,13 +1,13 @@
 """
 Serializers cho ứng dụng Content
 Cấu trúc nested: Program -> Subcourse -> Lesson
-Mở rộng: Objectives, Models, Preparation, BuildBlocks, 
+Mở rộng: Objectives, Models, AssemblyGuide, Preparation, BuildBlocks, 
 ContentBlocks, Attachments, Challenges, Quizzes
 """
 from rest_framework import serializers
 from .models import (
     Program, Subcourse, Lesson, UserProgress,
-    Media, LessonObjective, LessonModel, Preparation,
+    Media, LessonObjective, LessonModel, AssemblyGuide, Preparation,
     BuildBlock, LessonContentBlock, LessonAttachment,
     Challenge, Quiz, QuizQuestion, QuestionOption,
     QuizSubmission, QuizAnswer
@@ -362,29 +362,13 @@ class LessonModelSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at']
 
 
-class PreparationSerializer(serializers.ModelSerializer):
-    """Serializer cho Chuẩn bị bài học"""
+class AssemblyGuideSerializer(serializers.ModelSerializer):
+    """Serializer cho Hướng dẫn lắp ráp"""
     media = MediaSerializer(many=True, read_only=True)
+    media_count = serializers.SerializerMethodField()
     
     class Meta:
-        model = Preparation
-        fields = [
-            'id',
-            'lesson',
-            'text',
-            'media',
-            'created_at',
-            'updated_at',
-        ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
-
-
-class BuildBlockSerializer(serializers.ModelSerializer):
-    """Serializer cho Khối xây dựng"""
-    media = MediaSerializer(many=True, read_only=True)
-    
-    class Meta:
-        model = BuildBlock
+        model = AssemblyGuide
         fields = [
             'id',
             'lesson',
@@ -392,10 +376,46 @@ class BuildBlockSerializer(serializers.ModelSerializer):
             'description',
             'pdf_url',
             'media',
+            'media_count',
+            'created_at',
+        ]
+        read_only_fields = ['id', 'created_at']
+    
+    def get_media_count(self, obj):
+        """Đếm số media"""
+        return obj.media.count()
+
+
+class BuildBlockSerializer(serializers.ModelSerializer):
+    """Serializer cho Khối xây dựng"""
+    class Meta:
+        model = BuildBlock
+        fields = [
+            'id',
+            'program',
+            'title',
+            'description',
+            'pdf_url',
             'order',
             'created_at',
         ]
         read_only_fields = ['id', 'created_at']
+
+
+class PreparationSerializer(serializers.ModelSerializer):
+    """Serializer cho Chuẩn bị bài học - Nhiều BuildBlocks"""
+    build_blocks = BuildBlockSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Preparation
+        fields = [
+            'id',
+            'lesson',
+            'build_blocks',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
 
 
 class LessonContentBlockSerializer(serializers.ModelSerializer):
@@ -678,8 +698,8 @@ class LessonDetailSerializer(serializers.ModelSerializer):
     )
     objectives = LessonObjectiveSerializer(many=True, read_only=True)
     models = LessonModelSerializer(many=True, read_only=True)
-    preparations = PreparationSerializer(many=True, read_only=True)
-    build_blocks = BuildBlockSerializer(many=True, read_only=True)
+    assembly_guides = AssemblyGuideSerializer(many=True, read_only=True)
+    preparation = PreparationSerializer(read_only=True)
     content_blocks = LessonContentBlockSerializer(many=True, read_only=True)
     attachments = LessonAttachmentSerializer(many=True, read_only=True)
     challenges = ChallengeSerializer(many=True, read_only=True)
@@ -688,7 +708,7 @@ class LessonDetailSerializer(serializers.ModelSerializer):
     # Counts
     objective_count = serializers.SerializerMethodField()
     model_count = serializers.SerializerMethodField()
-    block_count = serializers.SerializerMethodField()
+    assembly_guide_count = serializers.SerializerMethodField()
     attachment_count = serializers.SerializerMethodField()
     challenge_count = serializers.SerializerMethodField()
     quiz_count = serializers.SerializerMethodField()
@@ -712,11 +732,11 @@ class LessonDetailSerializer(serializers.ModelSerializer):
             # Models
             'models',
             'model_count',
+            # Assembly Guides
+            'assembly_guides',
+            'assembly_guide_count',
             # Preparation
-            'preparations',
-            # Build Blocks
-            'build_blocks',
-            'block_count',
+            'preparation',
             # Content Blocks
             'content_blocks',
             # Attachments
@@ -740,8 +760,8 @@ class LessonDetailSerializer(serializers.ModelSerializer):
     def get_model_count(self, obj):
         return obj.models.count()
     
-    def get_block_count(self, obj):
-        return obj.build_blocks.count()
+    def get_assembly_guide_count(self, obj):
+        return obj.assembly_guides.count()
     
     def get_attachment_count(self, obj):
         return obj.attachments.count()

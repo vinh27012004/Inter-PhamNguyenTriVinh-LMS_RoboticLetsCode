@@ -34,6 +34,16 @@ class UserProfile(models.Model):
     )
     
     # Thông tin bổ sung
+    full_name = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name='Họ và tên'
+    )
+    school = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name='Trường học'
+    )
     phone = models.CharField(
         max_length=20,
         blank=True,

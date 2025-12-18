@@ -20,7 +20,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
         source='user.email',
         read_only=True
     )
-    full_name = serializers.SerializerMethodField()
     role_display = serializers.CharField(
         source='get_role_display',
         read_only=True
@@ -34,6 +33,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'username',
             'email',
             'full_name',
+            'school',
             'role',
             'role_display',
             'phone',
@@ -43,12 +43,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'updated_at',
         ]
         read_only_fields = ['id', 'user', 'created_at', 'updated_at']
-    
-    def get_full_name(self, obj):
-        """Lấy họ tên đầy đủ từ User"""
-        user = obj.user
-        full = f"{user.first_name} {user.last_name}".strip()
-        return full if full else user.username
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -186,7 +180,7 @@ class AuthAssignmentSerializer(serializers.ModelSerializer):
 class AuthAssignmentListSerializer(serializers.ModelSerializer):
     """
     Serializer rút gọn cho danh sách phân quyền
-    Dùng cho list view, chỉ hiển thị thông tin cần thiết
+    Dùng cho list view, hiển thị đủ thông tin cho Frontend (my-courses page)
     """
     user_username = serializers.CharField(
         source='user.username',
@@ -195,6 +189,45 @@ class AuthAssignmentListSerializer(serializers.ModelSerializer):
     user_role = serializers.CharField(
         source='user.profile.role',
         read_only=True
+    )
+    
+    # Program info
+    program_title = serializers.CharField(
+        source='program.title',
+        read_only=True,
+        allow_null=True
+    )
+    program_slug = serializers.CharField(
+        source='program.slug',
+        read_only=True,
+        allow_null=True
+    )
+    
+    # Subcourse info
+    subcourse_title = serializers.CharField(
+        source='subcourse.title',
+        read_only=True,
+        allow_null=True
+    )
+    subcourse_slug = serializers.CharField(
+        source='subcourse.slug',
+        read_only=True,
+        allow_null=True
+    )
+    subcourse_thumbnail = serializers.CharField(
+        source='subcourse.thumbnail_url',
+        read_only=True,
+        allow_null=True
+    )
+    subcourse_level = serializers.CharField(
+        source='subcourse.level',
+        read_only=True,
+        allow_null=True
+    )
+    subcourse_session_count = serializers.IntegerField(
+        source='subcourse.session_count',
+        read_only=True,
+        allow_null=True
     )
     
     target_content = serializers.SerializerMethodField()
@@ -211,12 +244,31 @@ class AuthAssignmentListSerializer(serializers.ModelSerializer):
             'user',
             'user_username',
             'user_role',
-            'target_content',
+            
+            # Program info
+            'program',
+            'program_title',
+            'program_slug',
+            
+            # Subcourse info
+            'subcourse',
+            'subcourse_title',
+            'subcourse_slug',
+            'subcourse_thumbnail',
+            'subcourse_level',
+            'subcourse_session_count',
+            
+            # Status
             'status',
             'status_display',
             'is_valid',
+            
+            # Time period
             'valid_from',
             'valid_until',
+            
+            # Metadata
+            'target_content',
             'created_at',
         ]
         read_only_fields = ['id', 'created_at']
@@ -274,3 +326,29 @@ class UserWithAssignmentsSerializer(serializers.ModelSerializer):
     def get_active_assignments_count(self, obj):
         """Đếm số phân quyền đang active"""
         return obj.auth_assignments.filter(status='ACTIVE').count()
+
+
+class UpdateProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer cho việc cập nhật profile
+    """
+    class Meta:
+        model = UserProfile
+        fields = ['full_name', 'school', 'phone', 'avatar_url', 'bio']
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """
+    Serializer cho việc đổi mật khẩu
+    """
+    old_password = serializers.CharField(required=True, write_only=True)
+    new_password = serializers.CharField(required=True, write_only=True, min_length=8)
+    confirm_password = serializers.CharField(required=True, write_only=True)
+    
+    def validate(self, attrs):
+        """Kiểm tra mật khẩu mới và xác nhận khớp nhau"""
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError({
+                'confirm_password': 'Mật khẩu xác nhận không khớp'
+            })
+        return attrs

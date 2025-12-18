@@ -41,6 +41,8 @@ export default function LoginPage() {
         localStorage.setItem('access_token', data.access);
         localStorage.setItem('refresh_token', data.refresh);
         localStorage.setItem('username', formData.username);
+        // Lưu tạm full_name bằng username, sẽ cập nhật sau khi lấy profile
+        localStorage.setItem('full_name', formData.username);
 
         // Lấy thông tin profile để biết role
         try {
@@ -53,12 +55,14 @@ export default function LoginPage() {
           
           if (profileResponse.ok) {
             const profileData = await profileResponse.json();
+            localStorage.setItem('full_name', profileData.full_name || formData.username);
             localStorage.setItem('user_role', profileData.role || 'STUDENT');
           } else {
             localStorage.setItem('user_role', 'STUDENT');
           }
         } catch (profileErr) {
           console.error('Error fetching profile:', profileErr);
+          localStorage.setItem('full_name', formData.username);
           localStorage.setItem('user_role', 'STUDENT');
         }
 

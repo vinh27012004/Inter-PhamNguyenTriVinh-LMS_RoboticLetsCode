@@ -125,8 +125,7 @@ export default function HomePage() {
                 description={program.description}
                 thumbnail_url={program.thumbnail_url}
                 kit_type={program.kit_type}
-                subcourse_count={program.subcourse_count}
-                total_lessons={program.total_lessons || 0}
+                subcourse_count={program.subcourse_count} 
               />
             ))}
           </div>

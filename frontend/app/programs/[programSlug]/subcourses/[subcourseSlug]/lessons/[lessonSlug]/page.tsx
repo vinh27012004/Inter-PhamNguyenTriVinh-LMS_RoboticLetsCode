@@ -13,7 +13,7 @@ import { ArrowLeft, BookOpen, Clock } from 'lucide-react';
 import ObjectivesSection from '@/components/lesson/ObjectivesSection';
 import ModelsSection from '@/components/lesson/ModelsSection';
 import PreparationSection from '@/components/lesson/PreparationSection';
-import BuildBlocksSection from '@/components/lesson/BuildBlocksSection';
+import AssemblyGuideSection from '@/components/lesson/AssemblyGuideSection';
 import LessonContentsSection from '@/components/lesson/LessonContentsSection';
 import AttachmentsSection from '@/components/lesson/AttachmentsSection';
 import ChallengesSection from '@/components/lesson/ChallengesSection';
@@ -34,9 +34,9 @@ interface LessonData {
   objectives_count: number;
   models: any[];
   models_count: number;
-  preparations: any;
-  build_blocks: any[];
-  build_blocks_count: number;
+  assembly_guides: any[];
+  assembly_guide_count: number;
+  preparation: any;
   content_blocks: any[];
   content_blocks_count: number;
   attachments: any[];
@@ -160,10 +160,10 @@ export default function LessonDetailPage() {
         <ModelsSection models={lesson.models || []} />
 
         {/* Preparation Section */}
-        <PreparationSection preparation={lesson.preparations} />
+        <PreparationSection preparation={lesson.preparation} />
 
-        {/* Build Blocks Section */}
-        <BuildBlocksSection buildBlocks={lesson.build_blocks || []} />
+        {/* Assembly Guide Section */}
+        <AssemblyGuideSection assemblyGuides={lesson.assembly_guides || []} />
 
         {/* Lesson Contents Section */}
         <LessonContentsSection contentBlocks={lesson.content_blocks || []} />

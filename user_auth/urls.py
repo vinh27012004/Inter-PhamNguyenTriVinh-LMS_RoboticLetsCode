@@ -26,6 +26,7 @@ urlpatterns = [
 # API Endpoints được tạo ra:
 # /api/auth/profile/ - User profile
 # /api/auth/profile/me/ - GET profile của user hiện tại
+# /api/auth/profile/change_password/ - POST đổi mật khẩu
 # /api/auth/assignments/ - Danh sách quyền của user
 # /api/auth/assignments/{id}/ - Chi tiết 1 assignment
 # /api/auth/assignments/my_programs/ - Danh sách Program IDs có quyền

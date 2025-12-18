@@ -420,15 +420,15 @@ class PreparationViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = StandardResultsSetPagination
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['lesson']
-    search_fields = ['item_name', 'description', 'notes']
-    ordering_fields = ['sort_order', 'created_at']
-    ordering = ['lesson', 'sort_order']
+    search_fields = []
+    ordering_fields = ['created_at']
+    ordering = ['lesson']
     
     def get_queryset(self):
-        """Preparations của published lessons với prefetch media"""
+        """Preparations của published lessons với prefetch build_blocks"""
         return Preparation.objects.filter(
             lesson__status='PUBLISHED'
-        ).select_related('lesson').prefetch_related('media')
+        ).select_related('lesson').prefetch_related('build_blocks')
 
 
 class BuildBlockViewSet(viewsets.ReadOnlyModelViewSet):
@@ -691,8 +691,8 @@ class LessonDetailViewSet(viewsets.ReadOnlyModelViewSet):
         ).prefetch_related(
             'objectives',
             'models', 'models__media',
-            'preparations', 'preparations__media',
-            'build_blocks', 'build_blocks__media',
+            'assembly_guides', 'assembly_guides__media',
+            'preparation', 'preparation__build_blocks',
             'content_blocks', 'content_blocks__media',
             'attachments',
             'challenges', 'challenges__media',

@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from .models import (
     Program, Subcourse, Lesson, UserProgress,
-    Media, LessonObjective, LessonModel, Preparation,
+    Media, LessonObjective, LessonModel, AssemblyGuide, Preparation,
     BuildBlock, LessonContentBlock, LessonAttachment,
     Challenge, Quiz, QuizQuestion, QuestionOption,
     QuizSubmission, QuizAnswer
@@ -97,13 +97,16 @@ class LessonModelInline(admin.TabularInline):
     verbose_name_plural = 'Mô hình/Demo bài học'
 
 
-class BuildBlockInline(admin.TabularInline):
-    """Inline quản lý Khối xây dựng"""
-    model = BuildBlock
+class AssemblyGuideInline(admin.StackedInline):
+    """Inline quản lý Hướng dẫn lắp ráp"""
+    model = AssemblyGuide
     extra = 1
-    fields = ['title', 'description', 'pdf_url', 'order']
-    verbose_name = 'Khối xây dựng'
-    verbose_name_plural = 'Khối xây dựng (Build Instructions)'
+    fields = ['title', 'description', 'pdf_url', 'media', 'order']
+    verbose_name = 'Hướng dẫn lắp ráp'
+    verbose_name_plural = 'Hướng dẫn lắp ráp (Assembly Guides)'
+    filter_horizontal = ['media']  # Cho phép chọn multiple media dễ hơn
+
+
 
 
 class LessonContentBlockInline(admin.StackedInline):
@@ -389,7 +392,6 @@ class LessonAdmin(admin.ModelAdmin):
     inlines = [
         LessonObjectiveInline,
         LessonModelInline,
-        BuildBlockInline,
         LessonContentBlockInline,
         LessonAttachmentInline,
         ChallengeInline,
@@ -685,8 +687,8 @@ class PreparationAdmin(admin.ModelAdmin):
     """Admin cho Chuẩn bị bài học"""
     list_display = [
         'lesson',
-        'text_preview',
-        'media_count',
+        'build_blocks_count',
+        'created_at',
     ]
     
     list_filter = [
@@ -695,74 +697,62 @@ class PreparationAdmin(admin.ModelAdmin):
     ]
     
     search_fields = [
-        'text',
         'lesson__title',
     ]
     
-    filter_horizontal = ['media']
+    filter_horizontal = ['build_blocks']
     
     fieldsets = (
         ('Bài học', {
             'fields': ('lesson',)
         }),
-        ('Nội dung chuẩn bị', {
-            'fields': ('text', 'media')
+        ('Khối chuẩn bị', {
+            'fields': ('build_blocks',),
+            'description': 'Chọn các build blocks cần hiển thị trong phần chuẩn bị'
         }),
     )
     
     list_per_page = 30
     ordering = ['lesson']
     
-    def text_preview(self, obj):
-        """Hiển thị text rút gọn"""
-        text = obj.text
-        if len(text) > 80:
-            text = text[:77] + '...'
-        return text
-    text_preview.short_description = 'Nội dung'
-    
-    def media_count(self, obj):
-        """Số lượng media"""
-        count = obj.media.count()
-        return format_html('<strong>{}</strong> media', count)
-    media_count.short_description = 'Media'
+    def build_blocks_count(self, obj):
+        """Số lượng build blocks"""
+        count = obj.build_blocks.count()
+        return format_html('<strong>{}</strong> blocks', count)
+    build_blocks_count.short_description = 'Build Blocks'
 
 
 @admin.register(BuildBlock)
 class BuildBlockAdmin(admin.ModelAdmin):
     """Admin cho Khối xây dựng"""
     list_display = [
-        'lesson',
+        'program',
         'title',
         'pdf_badge',
-        'media_count',
         'order',
     ]
     
     list_filter = [
-        'lesson__subcourse__program',
-        'lesson__subcourse',
+        'program',
     ]
     
     search_fields = [
         'title',
         'description',
-        'lesson__title',
+        'program__title',
     ]
     
-    filter_horizontal = ['media']
-    
     fieldsets = (
-        ('Bài học', {
-            'fields': ('lesson',)
+        ('Chương trình học', {
+            'fields': ('program',)
         }),
         ('Thông tin khối xây dựng', {
-            'fields': ('title', 'description', 'pdf_url', 'media', 'order')
+            'fields': ('title', 'description', 'pdf_url', 'order')
         }),
     )
     
     list_per_page = 30
-    ordering = ['lesson', 'order']
+    ordering = ['program', 'order']
     
     def pdf_badge(self, obj):
         """Hiển thị badge nếu có PDF"""
@@ -774,11 +764,6 @@ class BuildBlockAdmin(admin.ModelAdmin):
         return format_html('<span style="color: #999;">-</span>')
     pdf_badge.short_description = 'PDF'
     
-    def media_count(self, obj):
-        """Số lượng media (slides)"""
-        count = obj.media.count()
-        return format_html('<strong>{}</strong> slides', count)
-    media_count.short_description = 'Slides'
 
 
 @admin.register(LessonContentBlock)
@@ -922,6 +907,67 @@ class LessonAttachmentAdmin(admin.ModelAdmin):
             obj.file_url
         )
     file_link.short_description = 'Link'
+
+
+@admin.register(AssemblyGuide)
+class AssemblyGuideAdmin(admin.ModelAdmin):
+    """Admin cho Hướng dẫn lắp ráp"""
+    list_display = [
+        'lesson',
+        'title',
+        'media_count',
+        'pdf_status',
+    ]
+    
+    list_filter = [
+        'lesson__subcourse__program',
+        'lesson__subcourse',
+        'lesson',
+        'created_at',
+    ]
+    
+    search_fields = [
+        'title',
+        'description',
+        'lesson__title',
+    ]
+    
+    filter_horizontal = ['media']
+    
+    fieldsets = (
+        ('Bài học', {
+            'fields': ('lesson',)
+        }),
+        ('Thông tin hướng dẫn', {
+            'fields': ('title', 'description')
+        }),
+        ('Media & PDF', {
+            'fields': ('media', 'pdf_url'),
+            'classes': ('wide',),
+        }),
+    )
+    
+    list_per_page = 30
+    ordering = ['lesson', 'id']
+    
+    def media_count(self, obj):
+        """Hiển thị số lượng media"""
+        count = obj.media.count()
+        return format_html(
+            '<span style="background-color: #E7F3FF; padding: 3px 8px; border-radius: 3px; font-weight: bold;">{} ảnh</span>',
+            count
+        )
+    media_count.short_description = 'Media'
+    
+    def pdf_status(self, obj):
+        """Hiển thị trạng thái PDF"""
+        if obj.pdf_url:
+            return format_html(
+                '<a href="{}" target="_blank" style="color: #007BFF; text-decoration: none;">📄 PDF</a>',
+                obj.pdf_url
+            )
+        return format_html('<span style="color: #999;">-</span>')
+    pdf_status.short_description = 'PDF'
 
 
 @admin.register(Challenge)

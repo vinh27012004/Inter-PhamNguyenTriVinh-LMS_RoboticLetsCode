@@ -16,9 +16,9 @@ from .serializers import (
     AuthAssignmentSerializer,
     AuthAssignmentListSerializer,
     UserWithAssignmentsSerializer,
+    UpdateProfileSerializer,
+    ChangePasswordSerializer,
 )
-
-
 class UserProfileViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet cho UserProfile
@@ -26,6 +26,9 @@ class UserProfileViewSet(viewsets.ReadOnlyModelViewSet):
     
     Endpoints:
     - GET /api/profile/ - Profile của user hiện tại
+    - GET /api/profile/me/ - Profile của user hiện tại
+    - PUT /api/profile/me/update/ - Cập nhật profile
+    - POST /api/profile/me/change_password/ - Đổi mật khẩu
     """
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
@@ -52,6 +55,59 @@ class UserProfileViewSet(viewsets.ReadOnlyModelViewSet):
                 {'error': 'Profile not found'},
                 status=status.HTTP_404_NOT_FOUND
             )
+    
+    @action(detail=False, methods=['put', 'patch'])
+    def update_profile(self, request):
+        """
+        Cập nhật thông tin profile
+        PUT/PATCH /api/profile/update_profile/
+        """
+        try:
+            profile = request.user.profile
+            serializer = UpdateProfileSerializer(profile, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                # Trả về profile đầy đủ
+                full_serializer = UserProfileSerializer(profile)
+                return Response(full_serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except UserProfile.DoesNotExist:
+            return Response(
+                {'error': 'Profile not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    @action(detail=False, methods=['post'])
+    def change_password(self, request):
+        """
+        Đổi mật khẩu
+        POST /api/profile/change_password/
+        Body: {
+            "old_password": "...",
+            "new_password": "...",
+            "confirm_password": "..."
+        }
+        """
+        serializer = ChangePasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            user = request.user
+            
+            # Kiểm tra mật khẩu cũ
+            if not user.check_password(serializer.validated_data['old_password']):
+                return Response(
+                    {'old_password': 'Mật khẩu cũ không đúng'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Đặt mật khẩu mới
+            user.set_password(serializer.validated_data['new_password'])
+            user.save()
+            
+            return Response(
+                {'message': 'Đổi mật khẩu thành công'},
+                status=status.HTTP_200_OK
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AuthAssignmentViewSet(viewsets.ReadOnlyModelViewSet):

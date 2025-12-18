@@ -335,8 +335,7 @@ class Media(models.Model):
     
     url = models.URLField(
         max_length=500,
-        verbose_name='URL Media',
-        help_text='URL trên Object Storage (S3/MinIO)'
+        verbose_name='URL Media'
     )
     media_type = models.CharField(
         max_length=20,
@@ -474,26 +473,74 @@ class LessonModel(models.Model):
         return f"{self.lesson.title} - {self.title}"
 
 
-class Preparation(models.Model):
+class AssemblyGuide(models.Model):
     """
-    Chuẩn bị cho bài học
-    Bao gồm: công cụ cần dùng, kiến thức nền, tài nguyên chuẩn bị
+    Hướng dẫn lắp ráp (Assembly Instructions)
+    Liên kết với Lesson, gồm tiêu đề, mô tả, PDF URL (optional) và nhiều ảnh/media
+    Thừa kế Media để hiển thị các bước lắp ráp chi tiết
     """
     lesson = models.ForeignKey(
         Lesson,
         on_delete=models.CASCADE,
-        related_name='preparations',
+        related_name='assembly_guides',
         verbose_name='Bài học'
     )
-    text = models.TextField(
-        verbose_name='Nội dung chuẩn bị',
-        help_text='Các thứ cần chuẩn bị: công cụ, tài liệu, kiến thức nền, v.v.'
+    title = models.CharField(
+        max_length=255,
+        verbose_name='Tên hướng dẫn lắp ráp'
+    )
+    description = models.TextField(
+        blank=True,
+        verbose_name='Mô tả'
+    )
+    pdf_url = models.URLField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name='Link PDF',
+        help_text='Link PDF hướng dẫn lắp ráp (optional)'
     )
     media = models.ManyToManyField(
         Media,
         blank=True,
-        related_name='preparations',
-        verbose_name='Media (Ảnh hướng dẫn)'
+        related_name='assembly_guides',
+        verbose_name='Ảnh/Media hướng dẫn'
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Ngày tạo')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Ngày cập nhật')
+    
+    class Meta:
+        db_table = 'assembly_guides'
+        verbose_name = 'Hướng dẫn lắp ráp'
+        verbose_name_plural = 'Hướng dẫn lắp ráp'
+        ordering = ['lesson', 'id']
+        indexes = [
+            models.Index(fields=['lesson']),
+        ]
+    
+    def __str__(self):
+        return f"{self.lesson.title} - {self.title}"
+
+
+class Preparation(models.Model):
+    """
+    Chuẩn bị cho bài học
+    Liên kết với nhiều BuildBlocks để hiển thị các khối chuẩn bị (png, pdf)
+    """
+    lesson = models.OneToOneField(
+        Lesson,
+        on_delete=models.CASCADE,
+        related_name='preparation',
+        verbose_name='Bài học',
+        help_text='Mỗi bài học chỉ có một phần chuẩn bị'
+    )
+    build_blocks = models.ManyToManyField(
+        'BuildBlock',
+        blank=True,
+        related_name='used_in_preparations',
+        verbose_name='Các khối xây dựng chuẩn bị',
+        help_text='Chọn các build blocks cần hiển thị trong phần chuẩn bị'
     )
     
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Ngày tạo')
@@ -503,7 +550,7 @@ class Preparation(models.Model):
         db_table = 'preparations'
         verbose_name = 'Chuẩn bị bài học'
         verbose_name_plural = 'Chuẩn bị bài học'
-        unique_together = [['lesson']]  # Chỉ 1 preparation cho 1 lesson
+        ordering = ['lesson']
     
     def __str__(self):
         return f"Chuẩn bị - {self.lesson.title}"
@@ -513,12 +560,13 @@ class BuildBlock(models.Model):
     """
     Khối xây dựng (Build Instructions)
     Có thể là PDF hoặc tập hợp các ảnh slide
+    Liên kết với Program (Chương trình học) để dùng chung cho tất cả lessons
     """
-    lesson = models.ForeignKey(
-        Lesson,
+    program = models.ForeignKey(
+        Program,
         on_delete=models.CASCADE,
         related_name='build_blocks',
-        verbose_name='Bài học'
+        verbose_name='Chương trình học'
     )
     title = models.CharField(
         max_length=255,
@@ -535,13 +583,6 @@ class BuildBlock(models.Model):
         verbose_name='Link PDF',
         help_text='Link PDF hướng dẫn xây dựng (optional)'
     )
-    media = models.ManyToManyField(
-        Media,
-        blank=True,
-        related_name='build_blocks',
-        verbose_name='Ảnh slide/bước xây dựng',
-        help_text='Các ảnh hướng dẫn xây dựng từng bước'
-    )
     order = models.PositiveIntegerField(
         default=0,
         verbose_name='Thứ tự'
@@ -554,13 +595,13 @@ class BuildBlock(models.Model):
         db_table = 'build_blocks'
         verbose_name = 'Khối xây dựng'
         verbose_name_plural = 'Khối xây dựng'
-        ordering = ['lesson', 'order']
+        ordering = ['program', 'order']
         indexes = [
-            models.Index(fields=['lesson', 'order']),
+            models.Index(fields=['program', 'order']),
         ]
     
     def __str__(self):
-        return f"{self.lesson.title} - Build Block: {self.title}"
+        return f"{self.program.title} - Build Block: {self.title}"
 
 
 class LessonContentBlock(models.Model):

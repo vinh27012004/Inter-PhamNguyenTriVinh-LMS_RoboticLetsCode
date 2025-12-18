@@ -16,6 +16,7 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState('');
+  const [full_name, setFullName] = useState('');
   const router = useRouter();
   const pathname = usePathname();
 
@@ -28,10 +29,19 @@ export default function Navbar() {
     const token = Cookies.get('access_token') || localStorage.getItem('access_token');
     setIsAuthenticated(!!token);
     
-    // Lấy username từ localStorage nếu có
+    // Lấy username và full_name từ localStorage nếu có
     const storedUsername = localStorage.getItem('username');
+    const storedFullName = localStorage.getItem('full_name');
+
     if (storedUsername) {
       setUsername(storedUsername);
+    }
+
+    if (storedFullName) {
+      setFullName(storedFullName);
+    } else if (storedUsername) {
+      // Fallback hiển thị username nếu chưa có full_name
+      setFullName(storedUsername);
     }
   };
 
@@ -43,10 +53,12 @@ export default function Navbar() {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('username');
+    localStorage.removeItem('full_name');
     
     // Update state
     setIsAuthenticated(false);
     setUsername('');
+    setFullName('');
     
     // Redirect về trang chủ
     router.push('/');
@@ -91,7 +103,7 @@ export default function Navbar() {
                 <>
                   {username && (
                     <span className="text-brandYellow-300 font-medium px-3">
-                      Xin chào, {username}
+                      Xin chào, {full_name}
                     </span>
                   )}
                   <Link

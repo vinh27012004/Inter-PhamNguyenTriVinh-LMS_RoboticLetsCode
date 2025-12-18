@@ -153,11 +153,6 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
             )}
           </div>
         )}
-
-        {/* Action Button */}
-        <button className="w-full py-3 px-4 bg-brandPurple-600 hover:bg-brandPurple-700 text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg">
-          Bắt đầu thử thách
-        </button>
       </div>
     </div>
   );
@@ -184,7 +179,7 @@ export default function ChallengesSection({ challenges }: ChallengesSectionProps
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1">
         {publishedChallenges.map((challenge) => (
           <ChallengeCard key={challenge.id} challenge={challenge} />
         ))}
