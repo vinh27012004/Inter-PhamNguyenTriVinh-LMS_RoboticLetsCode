@@ -45,7 +45,7 @@ export default function PreparationSection({ preparation }: PreparationSectionPr
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
         {preparation.build_blocks
           .sort((a, b) => a.order - b.order)
           .map((block) => {
