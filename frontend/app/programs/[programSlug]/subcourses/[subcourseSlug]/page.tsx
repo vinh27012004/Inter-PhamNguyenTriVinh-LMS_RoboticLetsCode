@@ -205,7 +205,7 @@ export default function SubcourseDetailPage() {
   const config = getLanguageConfig(subcourse.coding_language);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-brandPurple-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-brandPurple-50 to-white pt-16">
       {/* Header with back button */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">

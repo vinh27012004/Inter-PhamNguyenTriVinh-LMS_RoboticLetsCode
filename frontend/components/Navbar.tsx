@@ -7,7 +7,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Home, BookOpen, LogOut, User } from 'lucide-react';
+import { Home, BookOpen, LogOut, User, Users } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
@@ -17,6 +17,7 @@ export default function Navbar() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState('');
   const [full_name, setFullName] = useState('');
+  const [userRole, setUserRole] = useState('');
   const router = useRouter();
   const pathname = usePathname();
 
@@ -32,6 +33,7 @@ export default function Navbar() {
     // Lấy username và full_name từ localStorage nếu có
     const storedUsername = localStorage.getItem('username');
     const storedFullName = localStorage.getItem('full_name');
+    const storedRole = localStorage.getItem('user_role');
 
     if (storedUsername) {
       setUsername(storedUsername);
@@ -42,6 +44,10 @@ export default function Navbar() {
     } else if (storedUsername) {
       // Fallback hiển thị username nếu chưa có full_name
       setFullName(storedUsername);
+    }
+
+    if (storedRole) {
+      setUserRole(storedRole);
     }
   };
 
@@ -54,11 +60,13 @@ export default function Navbar() {
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('username');
     localStorage.removeItem('full_name');
+    localStorage.removeItem('user_role');
     
     // Update state
     setIsAuthenticated(false);
     setUsername('');
     setFullName('');
+    setUserRole('');
     
     // Redirect về trang chủ
     router.push('/');
@@ -66,11 +74,20 @@ export default function Navbar() {
 
   const menuItems = [
     { name: 'Trang chủ', href: '/', icon: Home },
-    { name: 'Khóa học của tôi', href: '/my-courses', icon: BookOpen },
   ];
 
+  // Thêm "Khóa học của tôi" chỉ khi không phải teacher
+  if (userRole !== 'TEACHER') {
+    menuItems.push({ name: 'Khóa học của tôi', href: '/my-courses', icon: BookOpen });
+  }
+
+  // Thêm menu cho teacher
+  if (userRole === 'TEACHER') {
+    menuItems.push({ name: 'Bảng điều khiển', href: '/teacher', icon: Users });
+  }
+
   return (
-    <nav className="bg-brandPurple-400 shadow-md sticky top-0 z-50">
+    <nav className="bg-brandPurple-400 shadow-md fixed top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo bên trái */}

@@ -114,13 +114,32 @@ export const getLessonFullDetail = async (slug) => {
  * Đánh dấu lesson hoàn thành
  * POST /api/content/lessons/{id}/mark_complete/
  */
-export const markLessonComplete = async (lessonId) => {
+/**
+ * Đánh dấu lesson hoàn thành
+ * POST /api/content/lessons/{slug}/mark_complete/
+ */
+export const markLessonComplete = async (lessonSlug) => {
   try {
-    const response = await axiosInstance.post(`/content/lessons/${lessonId}/mark_complete/`);
-    return response.data;
+    console.log('Calling markLessonComplete with slug:', lessonSlug);
+    const url = `/content/lessons/${lessonSlug}/mark_complete/`;
+    console.log('POST URL:', url);
+    
+    const response = await axiosInstance.post(url);
+    console.log('Response:', response);
+    
+    return {
+      success: true,
+      data: response.data,
+      status: response.status
+    };
   } catch (error) {
-    console.error(`Error marking lesson ${lessonId} complete:`, error);
-    throw error;
+    console.error(`Error marking lesson ${lessonSlug} complete:`, error);
+    console.error('Error response:', error.response);
+    return {
+      success: false,
+      error: error.response?.data?.detail || error.response?.data?.error || error.message,
+      status: error.response?.status
+    };
   }
 };
 

@@ -24,6 +24,9 @@ import {
   ChevronRight
 } from 'lucide-react';
 
+// Import services directly
+import { getLessonFullDetail, markLessonComplete } from '@/services/robotics';
+
 // Import lesson section components
 import ObjectivesSection from '@/components/lesson/ObjectivesSection';
 import ModelsSection from '@/components/lesson/ModelsSection';
@@ -77,6 +80,7 @@ export default function LessonDetailPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [isMarkingComplete, setIsMarkingComplete] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -91,7 +95,6 @@ export default function LessonDetailPage() {
         }
 
         // Lấy chi tiết lesson với FULL content
-        const { getLessonFullDetail } = await import('@/services/robotics');
         const lessonData = await getLessonFullDetail(lessonSlug);
         setLesson(lessonData);
       } catch (err: any) {
@@ -202,21 +205,35 @@ export default function LessonDetailPage() {
   const activeContent = sections.find((s) => s.key === activeSection);
 
   const handleMarkComplete = async () => {
+    if (isMarkingComplete) return;
+    
+    console.log('Marking complete for lesson slug:', lessonSlug);
+    
     try {
-      const { markLessonComplete } = await import('@/services/robotics');
-      await markLessonComplete(lesson.id);
-      setIsCompleted(true);
-      alert('Đã đánh dấu hoàn thành!');
-    } catch (err) {
+      setIsMarkingComplete(true);
+      const result = await markLessonComplete(lessonSlug);
+      
+      console.log('Mark complete result:', result);
+      
+      if (result.success) {
+        setIsCompleted(true);
+        alert('✅ Đã đánh dấu hoàn thành bài học!');
+      } else {
+        const errorMsg = result.error || 'Có lỗi xảy ra. Vui lòng thử lại.';
+        alert('❌ ' + errorMsg);
+      }
+    } catch (err: any) {
       console.error('Error marking complete:', err);
-      alert('Có lỗi xảy ra. Vui lòng thử lại.');
+      alert('❌ Có lỗi xảy ra. Vui lòng thử lại.');
+    } finally {
+      setIsMarkingComplete(false);
     }
   };
 
   return (
     <div className="fixed inset-0 bg-white flex flex-col pt-16">
       {/* Top Header - Compact */}
-      <div className="bg-white border-b border-gray-200 shadow-sm flex-shrink-0 z-50">
+      <div className="bg-white border-b border-gray-200 shadow-sm fixed top-16 left-0 right-0 z-40">
         <div className="px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
           {/* Left: Back button + Sidebar toggle (mobile) */}
           <div className="flex items-center gap-2">
@@ -249,21 +266,25 @@ export default function LessonDetailPage() {
           {/* Right: Mark complete button */}
           <button
             onClick={handleMarkComplete}
-            disabled={isCompleted}
+            disabled={isCompleted || isMarkingComplete}
             className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium text-sm transition-all ${
               isCompleted
                 ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                : isMarkingComplete
+                ? 'bg-gray-200 text-gray-500 cursor-wait'
                 : 'bg-green-600 text-white hover:bg-green-700 shadow-sm'
             }`}
           >
             <CheckCircle className="w-4 h-4" />
-            <span className="hidden sm:inline">{isCompleted ? 'Đã hoàn thành' : 'Hoàn thành'}</span>
+            <span className="hidden sm:inline">
+              {isMarkingComplete ? 'Đang lưu...' : isCompleted ? 'Đã hoàn thành' : 'Hoàn thành'}
+            </span>
           </button>
         </div>
       </div>
 
       {/* Main Layout: Sidebar + Content */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden pt-[60px]">
         {/* Sidebar Navigation */}
         <aside
           className={`${

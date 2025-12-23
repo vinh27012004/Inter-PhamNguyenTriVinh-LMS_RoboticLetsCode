@@ -70,6 +70,61 @@ class ClassViewSet(viewsets.ModelViewSet):
         serializer = ClassEnrollmentSerializer(enrollments, many=True)
         return Response(serializer.data)
     
+    @action(detail=True, methods=['get'])
+    def student_progress(self, request, pk=None):
+        """
+        Xem tiến độ học tập của học viên trong lớp
+        GET /api/classes/{id}/student_progress/
+        Query params: ?student={id} để lọc theo học viên cụ thể
+        """
+        from content.models import UserProgress
+        
+        class_obj = self.get_object()
+        student_id = request.query_params.get('student')
+        
+        # Lấy tất cả lessons trong subcourse của lớp
+        lessons = class_obj.subcourse.lessons.filter(status='PUBLISHED')
+        
+        # Lấy danh sách học viên active trong lớp
+        enrollments = class_obj.enrollments.filter(status='ACTIVE')
+        
+        if student_id:
+            enrollments = enrollments.filter(student_id=student_id)
+        
+        # Tổng hợp tiến độ từng học viên
+        results = []
+        for enrollment in enrollments.select_related('student', 'student__profile'):
+            # Lấy progress từ content.UserProgress
+            completed_lessons = UserProgress.objects.filter(
+                user=enrollment.student,
+                lesson__in=lessons,
+                is_completed=True
+            ).count()
+            
+            # Lấy thông tin bài học gần nhất
+            last_progress = UserProgress.objects.filter(
+                user=enrollment.student,
+                lesson__in=lessons
+            ).order_by('-updated_at').first()
+            
+            total_lessons = lessons.count()
+            completion_percentage = (completed_lessons / total_lessons * 100) if total_lessons > 0 else 0
+            
+            results.append({
+                'student_id': enrollment.student.id,
+                'student_username': enrollment.student.username,
+                'student_name': enrollment.student.profile.full_name if hasattr(enrollment.student, 'profile') else '',
+                'enrollment_status': enrollment.status,
+                'enrolled_at': enrollment.enrolled_at,
+                'total_lessons': total_lessons,
+                'completed_lessons': completed_lessons,
+                'completion_percentage': round(completion_percentage, 2),
+                'last_activity': last_progress.updated_at if last_progress else None,
+                'last_lesson': last_progress.lesson.title if last_progress else None,
+            })
+        
+        return Response(results)
+    
     @action(detail=True, methods=['post'])
     def enroll_student(self, request, pk=None):
         """
