@@ -3,7 +3,7 @@
  * Hiển thị các khối nội dung học tập chính (text + media)
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { BookOpen, Play, Code2, Lightbulb } from 'lucide-react';
 import Image from 'next/image';
 
@@ -132,9 +132,18 @@ function ContentBlockCard({ block }: { block: ContentBlock }) {
 export default function LessonContentsSection({ contentBlocks }: LessonContentsSectionProps) {
   if (!contentBlocks || contentBlocks.length === 0) return null;
 
+  // Sort blocks by order if available
+  const sortedBlocks = [...contentBlocks].sort((a, b) => {
+    const ao = typeof a.order === 'number' ? a.order : Number.MAX_SAFE_INTEGER;
+    const bo = typeof b.order === 'number' ? b.order : Number.MAX_SAFE_INTEGER;
+    return ao - bo;
+  });
+
+  const [activeIndex, setActiveIndex] = useState(0);
+
   return (
     <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-4">
         <div className="p-2 bg-indigo-100 rounded-lg">
           <BookOpen className="w-6 h-6 text-indigo-600" />
         </div>
@@ -144,10 +153,38 @@ export default function LessonContentsSection({ contentBlocks }: LessonContentsS
         </div>
       </div>
 
-      <div className="space-y-4">
-        {contentBlocks.map((block) => (
-          <ContentBlockCard key={block.id} block={block} />
-        ))}
+      {/* Tabs */}
+      <div className="border-b border-gray-200 -mx-6 px-6 mb-4 overflow-x-auto">
+        <div className="flex gap-2 py-2" role="tablist" aria-label="Khối nội dung bài học">
+          {sortedBlocks.map((block, idx) => {
+            const isActive = activeIndex === idx;
+            const config = contentTypeConfig[block.content_type as keyof typeof contentTypeConfig] || contentTypeConfig.text;
+            const Icon = config.icon;
+            return (
+              <button
+                key={block.id}
+                role="tab"
+                aria-selected={isActive}
+                aria-controls={`lesson-block-panel-${block.id}`}
+                onClick={() => setActiveIndex(idx)}
+                className={
+                  `flex items-center gap-2 px-3 py-2 rounded-md whitespace-nowrap text-sm font-medium transition-all duration-150 shadow-sm hover:-translate-y-[1px] hover:shadow-md ` +
+                  (isActive
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-gray-100 text-gray-700')
+                }
+              >
+                <Icon className={isActive ? 'w-4 h-4 text-white' : 'w-4 h-4 text-gray-700'} />
+                <span>{block.title || block.content_type_display}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Active Panel */}
+      <div id={`lesson-block-panel-${sortedBlocks[activeIndex].id}`} role="tabpanel" aria-labelledby={`lesson-block-tab-${sortedBlocks[activeIndex].id}`} className="space-y-4">
+        <ContentBlockCard key={sortedBlocks[activeIndex].id} block={sortedBlocks[activeIndex]} />
       </div>
     </section>
   );
