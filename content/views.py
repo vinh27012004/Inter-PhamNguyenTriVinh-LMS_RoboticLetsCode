@@ -2,7 +2,7 @@
 Views (ViewSets) cho Content API
 Read-only endpoints cho Program, Subcourse, Lesson
 """
-from rest_framework import viewsets, filters
+from rest_framework import viewsets, filters, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -10,6 +10,7 @@ from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from django.db import models
+from django.utils import timezone
 
 from .models import (
     Program, Subcourse, Lesson, UserProgress,
@@ -89,6 +90,12 @@ class ProgramViewSet(viewsets.ReadOnlyModelViewSet):
         if self.action == 'list':
             return ProgramListSerializer
         return ProgramSerializer
+    
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Chi tiết program - public access
+        """
+        return super().retrieve(request, *args, **kwargs)
 
 
 class SubcourseViewSet(viewsets.ReadOnlyModelViewSet):
@@ -140,46 +147,9 @@ class SubcourseViewSet(viewsets.ReadOnlyModelViewSet):
     
     def retrieve(self, request, *args, **kwargs):
         """
-        Chi tiết subcourse - kiểm tra quyền truy cập
-        User phải có AuthAssignment cho subcourse này hoặc program cha của nó
+        Chi tiết subcourse - public access
         """
-        instance = self.get_object()
-        
-        # ADMIN có quyền xem tất cả
-        if (
-            request.user.is_staff
-            or request.user.is_superuser
-            or (hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN')
-        ):
-            serializer = self.get_serializer(instance)
-            return Response(serializer.data)
-        
-        # Kiểm tra xem user có quyền truy cập không
-        from user_auth.models import AuthAssignment
-        from django.utils import timezone
-        now = timezone.now()
-        
-        # Kiểm tra assignment cho subcourse này hoặc program cha
-        has_access = AuthAssignment.objects.filter(
-            user=request.user,
-            status='ACTIVE',
-            valid_from__lte=now
-        ).filter(
-            # Kiểm tra valid_until nếu có (null = không giới hạn)
-            models.Q(valid_until__isnull=True) | models.Q(valid_until__gte=now)
-        ).filter(
-            # Có quyền trực tiếp cho subcourse này
-            (Q(subcourse=instance)) |
-            # Hoặc có quyền cho program cha (program-level access)
-            (Q(program=instance.program, subcourse__isnull=True))
-        ).exists()
-        
-        if not has_access:
-            from rest_framework.exceptions import PermissionDenied
-            raise PermissionDenied('Bạn không có quyền truy cập khóa học này.')
-        
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+        return super().retrieve(request, *args, **kwargs)
 
 
 class LessonViewSet(viewsets.ReadOnlyModelViewSet):
@@ -233,69 +203,54 @@ class LessonViewSet(viewsets.ReadOnlyModelViewSet):
     
     def retrieve(self, request, *args, **kwargs):
         """
-        Chi tiết lesson - kiểm tra quyền truy cập
-        User phải có AuthAssignment cho subcourse hoặc program
+        Chi tiết lesson - public access
         """
-        instance = self.get_object()
-        
-        # ADMIN có quyền xem tất cả
-        if (
-            request.user.is_staff
-            or request.user.is_superuser
-            or (hasattr(request.user, 'profile') and request.user.profile.role == 'ADMIN')
-        ):
-            serializer = self.get_serializer(instance)
-            return Response(serializer.data)
-        
-        # Kiểm tra xem user có quyền truy cập không
-        from user_auth.models import AuthAssignment
-        from django.utils import timezone
-        now = timezone.now()
-        
-        # Kiểm tra assignment cho subcourse chứa lesson này hoặc program cha
-        has_access = AuthAssignment.objects.filter(
-            user=request.user,
-            status='ACTIVE',
-            valid_from__lte=now
-        ).filter(
-            # Kiểm tra valid_until nếu có (null = không giới hạn)
-            models.Q(valid_until__isnull=True) | models.Q(valid_until__gte=now)
-        ).filter(
-            # Có quyền cho subcourse chứa lesson này
-            (Q(subcourse=instance.subcourse)) |
-            # Hoặc có quyền cho program cha (program-level access)
-            (Q(program=instance.subcourse.program, subcourse__isnull=True))
-        ).exists()
-        
-        if not has_access:
-            from rest_framework.exceptions import PermissionDenied
-            raise PermissionDenied('Bạn không có quyền truy cập bài học này.')
-        
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+        return super().retrieve(request, *args, **kwargs)
     
-    @action(detail=True, methods=['post'])
-    def mark_complete(self, request, pk=None):
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def mark_complete(self, request, *args, **kwargs):
         """
-        Custom action: Đánh dấu bài học hoàn thành
-        POST /api/lessons/{id}/mark_complete/
+        Đánh dấu bài học hoàn thành (đơn giản)
+        POST /api/content/lessons/{slug}/mark_complete/
         """
-        lesson = self.get_object()
         user = request.user
         
+        # Lấy lesson từ slug (vì URL dùng slug)
+        lesson = self.get_object()
+        
         # Tạo hoặc cập nhật UserProgress
-        progress, created = UserProgress.objects.get_or_create(
+        progress, created = UserProgress.objects.update_or_create(
             user=user,
             lesson=lesson,
-            defaults={'is_completed': True}
+            defaults={
+                'is_completed': True,
+                'completed_at': timezone.now()
+            }
         )
         
-        if not created and not progress.is_completed:
-            progress.is_completed = True
-            progress.save()
+        # Tính phần trăm hoàn thành trong subcourse
+        total_lessons = lesson.subcourse.lessons.filter(status='PUBLISHED').count()
+        completed_lessons = UserProgress.objects.filter(
+            user=user,
+            lesson__subcourse=lesson.subcourse,
+            is_completed=True
+        ).count()
         
-        serializer = UserProgressSerializer(progress)
-        return Response(serializer.data)
+        completion_percentage = (completed_lessons / total_lessons * 100) if total_lessons > 0 else 0
+        
+        return Response({
+            'success': True,
+            'message': 'Đã đánh dấu hoàn thành!',
+            'progress': {
+                'lesson_id': lesson.id,
+                'lesson_title': lesson.title,
+                'is_completed': progress.is_completed,
+                'completed_at': progress.completed_at,
+                'total_lessons': total_lessons,
+                'completed_lessons': completed_lessons,
+                'completion_percentage': round(completion_percentage, 2)
+            }
+        }, status=status.HTTP_200_OK)
 
 
 class UserProgressViewSet(viewsets.ReadOnlyModelViewSet):
