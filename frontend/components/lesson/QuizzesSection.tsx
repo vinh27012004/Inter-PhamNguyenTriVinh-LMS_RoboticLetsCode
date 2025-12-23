@@ -38,6 +38,8 @@ interface Quiz {
   total_points: number;
   status: string;
   order: number;
+  shuffle_questions?: number;
+  shuffle_options?: number;
 }
 
 interface QuizzesSectionProps {
@@ -50,8 +52,44 @@ function QuizCard({ quiz }: { quiz: Quiz }) {
   const [answers, setAnswers] = useState<Record<number, number[]>>({});
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
+  const [shuffledQuestions, setShuffledQuestions] = useState<QuizQuestion[]>([]);
 
-  const currentQuestion = quiz.questions[currentQuestionIndex];
+  const currentQuestion = shuffledQuestions[currentQuestionIndex] || quiz.questions[currentQuestionIndex];
+  
+  // Calculate totals from questions if not provided
+  const questionsCount = quiz.questions_count || quiz.questions.length;
+  const totalPoints = quiz.total_points || quiz.questions.reduce((sum, q) => sum + q.points, 0);
+
+  // Shuffle array utility
+  const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  // Shuffle questions and options when starting quiz
+  const handleStartQuiz = () => {
+    let questionsToUse = quiz.questions;
+    
+    // Shuffle questions if enabled
+    if (quiz.shuffle_questions) {
+      questionsToUse = shuffleArray(questionsToUse);
+    }
+    
+    // Shuffle options for each question if enabled
+    if (quiz.shuffle_options) {
+      questionsToUse = questionsToUse.map((question) => ({
+        ...question,
+        options: shuffleArray(question.options),
+      }));
+    }
+    
+    setShuffledQuestions(questionsToUse);
+    setIsStarted(true);
+  };
 
   const handleOptionSelect = (questionId: number, optionId: number, isSingle: boolean) => {
     if (submitted) return;
@@ -87,7 +125,8 @@ function QuizCard({ quiz }: { quiz: Quiz }) {
   const handleSubmit = () => {
     // Calculate score
     let totalScore = 0;
-    quiz.questions.forEach((question) => {
+    const questionsForReview = shuffledQuestions.length > 0 ? shuffledQuestions : quiz.questions;
+    questionsForReview.forEach((question) => {
       const userAnswers = answers[question.id] || [];
       const correctOptions = question.options.filter((opt) => opt.is_correct).map((opt) => opt.id);
       
@@ -101,7 +140,7 @@ function QuizCard({ quiz }: { quiz: Quiz }) {
       }
     });
 
-    setScore((totalScore / quiz.total_points) * 100);
+    setScore((totalScore / totalPoints) * 100);
     setSubmitted(true);
     setCurrentQuestionIndex(0);
   };
@@ -123,7 +162,7 @@ function QuizCard({ quiz }: { quiz: Quiz }) {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           <div className="bg-white rounded-lg p-3 border border-gray-200">
-            <div className="text-2xl font-bold text-brandPurple-600">{quiz.questions_count}</div>
+            <div className="text-2xl font-bold text-indigo-600">{questionsCount}</div>
             <div className="text-xs text-gray-600">Câu hỏi</div>
           </div>
           <div className="bg-white rounded-lg p-3 border border-gray-200">
@@ -131,7 +170,7 @@ function QuizCard({ quiz }: { quiz: Quiz }) {
             <div className="text-xs text-gray-600">Điểm đạt</div>
           </div>
           <div className="bg-white rounded-lg p-3 border border-gray-200">
-            <div className="text-2xl font-bold text-blue-600">{quiz.total_points}</div>
+            <div className="text-2xl font-bold text-blue-600">{totalPoints}</div>
             <div className="text-xs text-gray-600">Tổng điểm</div>
           </div>
           {quiz.time_limit_minutes && (
@@ -143,8 +182,8 @@ function QuizCard({ quiz }: { quiz: Quiz }) {
         </div>
 
         <button
-          onClick={() => setIsStarted(true)}
-          className="w-full py-3 px-6 bg-brandPurple-600 hover:bg-brandPurple-700 text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg"
+          onClick={handleStartQuiz}
+          className="w-full py-3 px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors shadow-md hover:shadow-lg"
         >
           Bắt đầu làm bài
         </button>
@@ -170,7 +209,7 @@ function QuizCard({ quiz }: { quiz: Quiz }) {
           <h3 className="text-2xl font-bold text-gray-900 mb-2">
             {passed ? 'Chúc mừng! Bạn đã đạt!' : 'Chưa đạt yêu cầu'}
           </h3>
-          <div className="text-5xl font-bold text-brandPurple-600 mb-2">
+          <div className="text-5xl font-bold text-indigo-600 mb-2">
             {score.toFixed(0)}%
           </div>
           <p className="text-gray-600">
@@ -180,7 +219,7 @@ function QuizCard({ quiz }: { quiz: Quiz }) {
 
         {/* Review Answers */}
         <div className="space-y-4 mb-6">
-          {quiz.questions.map((question, idx) => {
+          {(shuffledQuestions.length > 0 ? shuffledQuestions : quiz.questions).map((question, idx) => {
             const userAnswers = answers[question.id] || [];
             const correctOptions = question.options.filter((opt) => opt.is_correct).map((opt) => opt.id);
             const isCorrect =
@@ -230,7 +269,7 @@ function QuizCard({ quiz }: { quiz: Quiz }) {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-gray-700">
-            Câu {currentQuestionIndex + 1} / {quiz.questions.length}
+            Câu {currentQuestionIndex + 1} / {shuffledQuestions.length}
           </span>
           <span className="text-sm text-gray-600">
             {currentQuestion.points} điểm
@@ -238,8 +277,8 @@ function QuizCard({ quiz }: { quiz: Quiz }) {
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
-            className="bg-brandPurple-600 h-2 rounded-full transition-all"
-            style={{ width: `${((currentQuestionIndex + 1) / quiz.questions.length) * 100}%` }}
+            className="bg-indigo-600 h-2 rounded-full transition-all"
+            style={{ width: `${((currentQuestionIndex + 1) / shuffledQuestions.length) * 100}%` }}
           />
         </div>
       </div>
@@ -247,7 +286,7 @@ function QuizCard({ quiz }: { quiz: Quiz }) {
       {/* Question */}
       <div className="mb-6">
         <div className="flex items-start gap-3 mb-4">
-          <HelpCircle className="w-6 h-6 text-brandPurple-600 mt-1" />
+          <HelpCircle className="w-6 h-6 text-indigo-600 mt-1" />
           <div>
             <p className="text-lg font-semibold text-gray-900 mb-1">
               {currentQuestion.question_text}
@@ -270,7 +309,7 @@ function QuizCard({ quiz }: { quiz: Quiz }) {
                 onClick={() => handleOptionSelect(currentQuestion.id, option.id, isSingle)}
                 className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
                   isSelected
-                    ? 'border-brandPurple-500 bg-brandPurple-50'
+                    ? 'border-indigo-500 bg-indigo-50'
                     : 'border-gray-300 hover:border-gray-400 bg-white'
                 }`}
               >
@@ -278,7 +317,7 @@ function QuizCard({ quiz }: { quiz: Quiz }) {
                   <div
                     className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                       isSelected
-                        ? 'border-brandPurple-600 bg-brandPurple-600'
+                        ? 'border-indigo-600 bg-indigo-600'
                         : 'border-gray-400'
                     }`}
                   >
@@ -297,20 +336,20 @@ function QuizCard({ quiz }: { quiz: Quiz }) {
         <button
           onClick={handlePrevious}
           disabled={currentQuestionIndex === 0}
-          className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-4 py-2 border-2 border-indigo-600 text-indigo-600 bg-white rounded-lg hover:bg-indigo-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
         >
           ← Trước
         </button>
         <button
           onClick={handleNext}
-          disabled={currentQuestionIndex === quiz.questions.length - 1}
-          className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          disabled={currentQuestionIndex === shuffledQuestions.length - 1}
+          className="px-4 py-2 border-2 border-indigo-600 text-indigo-600 bg-white rounded-lg hover:bg-indigo-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
         >
           Sau →
         </button>
         <button
           onClick={handleSubmit}
-          className="ml-auto px-6 py-2 bg-brandPurple-600 hover:bg-brandPurple-700 text-white font-semibold rounded-lg transition-colors"
+          className="ml-auto px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition-colors"
         >
           Nộp bài
         </button>

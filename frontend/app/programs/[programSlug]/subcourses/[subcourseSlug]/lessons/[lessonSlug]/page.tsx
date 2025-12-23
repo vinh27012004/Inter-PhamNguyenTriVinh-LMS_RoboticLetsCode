@@ -329,15 +329,6 @@ export default function LessonDetailPage() {
                   {!isSidebarCollapsed && (
                     <>
                       <span className="flex-1 font-medium text-sm">{section.label}</span>
-                      {typeof section.count === 'number' && (
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded-full ${
-                            isActive ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-600'
-                          }`}
-                        >
-                          {section.count}
-                        </span>
-                      )}
                     </>
                   )}
                   {isSidebarCollapsed && typeof section.count === 'number' && section.count > 0 && (

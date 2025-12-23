@@ -47,6 +47,7 @@ class SubcourseInline(admin.TabularInline):
     # show_change_link = True  # Hiển thị link để edit chi tiết
     
     prepopulated_fields = {'slug': ('title',)}
+    ordering = ['sort_order']
     
     verbose_name = 'Khóa học con'
     verbose_name_plural = 'Khóa học con trong chương trình'
@@ -70,6 +71,7 @@ class LessonInline(admin.TabularInline):
     ]
     
     prepopulated_fields = {'slug': ('title',)}
+    ordering = ['sort_order']
     
     verbose_name = 'Bài học'
     verbose_name_plural = 'Bài học trong khóa con'
@@ -84,6 +86,7 @@ class LessonObjectiveInline(admin.TabularInline):
     model = LessonObjective
     extra = 1
     fields = ['objective_type', 'text', 'order']
+    ordering = ['order']
     verbose_name = 'Mục tiêu'
     verbose_name_plural = 'Mục tiêu bài học (Knowledge, Thinking, Skills, Attitude)'
 
@@ -93,6 +96,7 @@ class LessonModelInline(admin.TabularInline):
     model = LessonModel
     extra = 1
     fields = ['title', 'description', 'order']
+    ordering = ['order']
     verbose_name = 'Mô hình'
     verbose_name_plural = 'Mô hình/Demo bài học'
 
@@ -105,6 +109,7 @@ class AssemblyGuideInline(admin.StackedInline):
     verbose_name = 'Hướng dẫn lắp ráp'
     verbose_name_plural = 'Hướng dẫn lắp ráp (Assembly Guides)'
     filter_horizontal = ['media']  # Cho phép chọn multiple media dễ hơn
+    ordering = ['order']
 
 
 
@@ -116,6 +121,7 @@ class LessonContentBlockInline(admin.StackedInline):
     fields = ['title', 'subtitle', 'content_type', 'description', 'usage_text', 'example_text', 'order']
     verbose_name = 'Khối nội dung'
     verbose_name_plural = 'Khối nội dung học tập'
+    ordering = ['order']
 
 
 class LessonAttachmentInline(admin.TabularInline):
@@ -125,6 +131,7 @@ class LessonAttachmentInline(admin.TabularInline):
     fields = ['name', 'file_url', 'file_type', 'file_size_kb', 'order']
     verbose_name = 'Tệp đính kèm'
     verbose_name_plural = 'Tệp đính kèm (Files)'
+    ordering = ['order']
 
 
 class ChallengeInline(admin.StackedInline):
@@ -134,6 +141,7 @@ class ChallengeInline(admin.StackedInline):
     fields = ['title', 'subtitle', 'difficulty', 'description', 'instructions', 'points', 'status', 'order']
     verbose_name = 'Thử thách'
     verbose_name_plural = 'Thử thách/Bài tập'
+    ordering = ['order']
 
 
 class QuizInline(admin.TabularInline):
@@ -143,6 +151,7 @@ class QuizInline(admin.TabularInline):
     fields = ['title', 'quiz_type', 'passing_score', 'max_attempts', 'status', 'order']
     verbose_name = 'Quiz'
     verbose_name_plural = 'Bài kiểm tra/Quiz'
+    ordering = ['order']
 
 
 # ============================================================================
@@ -156,6 +165,7 @@ class QuestionOptionInline(admin.TabularInline):
     fields = ['option_text', 'is_correct', 'order']
     verbose_name = 'Lựa chọn'
     verbose_name_plural = 'Các lựa chọn (Options)'
+    ordering = ['order']
 
 
 class QuizQuestionInline(admin.StackedInline):
@@ -165,6 +175,7 @@ class QuizQuestionInline(admin.StackedInline):
     fields = ['question_text', 'question_type', 'explanation', 'points', 'order']
     verbose_name = 'Câu hỏi'
     verbose_name_plural = 'Câu hỏi Quiz'
+    ordering = ['order']
 
 
 class QuizAnswerInline(admin.TabularInline):
@@ -776,6 +787,8 @@ class LessonContentBlockAdmin(admin.ModelAdmin):
         'media_count',
         'order',
     ]
+    list_display_links = ['lesson', 'title']
+    list_editable = ['order']
     
     list_filter = [
         'content_type',
@@ -846,6 +859,8 @@ class LessonAttachmentAdmin(admin.ModelAdmin):
         'file_link',
         'order',
     ]
+    list_display_links = ['lesson', 'name']
+    list_editable = ['order']
     
     list_filter = [
         'file_type',
@@ -982,6 +997,8 @@ class ChallengeAdmin(admin.ModelAdmin):
         'media_count',
         'order',
     ]
+    list_display_links = ['lesson', 'title']
+    list_editable = ['order']
     
     list_filter = [
         'difficulty',
