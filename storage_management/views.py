@@ -19,7 +19,10 @@ from .serializers import (
     PresignedURLSerializer,
     FileListQuerySerializer,
 )
-from .services import ObjectStorageService, get_file_type_from_name
+from .services import LocalStorageService, get_file_type_from_name
+
+# Alias để tương thích
+ObjectStorageService = LocalStorageService
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):

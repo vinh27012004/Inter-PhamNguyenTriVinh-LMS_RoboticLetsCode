@@ -1,45 +1,29 @@
 """
-Service layer cho Object Storage operations
-Sử dụng boto3 để tương tác với S3-compatible storage
+Service layer cho Local File Storage operations
+Lưu trữ files trên local filesystem (MEDIA_ROOT)
 """
 import os
-import boto3
-from botocore.exceptions import ClientError
 from django.conf import settings
 from django.core.files.uploadedfile import UploadedFile
 from typing import Optional, List, Dict
 import mimetypes
-from datetime import timedelta
+from pathlib import Path
 
 
-class ObjectStorageService:
+class LocalStorageService:
     """
-    Service để quản lý Object Storage (S3-compatible)
-    Hỗ trợ: AWS S3, MinIO, OB Việt Nam, etc.
+    Service để quản lý Local File Storage
+    Lưu files vào MEDIA_ROOT
     """
     
     def __init__(self):
-        """Khởi tạo S3 client từ settings"""
-        self.access_key = getattr(settings, 'AWS_ACCESS_KEY_ID', None)
-        self.secret_key = getattr(settings, 'AWS_SECRET_ACCESS_KEY', None)
-        self.bucket_name = getattr(settings, 'AWS_STORAGE_BUCKET_NAME', None)
-        self.endpoint_url = getattr(settings, 'AWS_S3_ENDPOINT_URL', None)
-        self.region = getattr(settings, 'AWS_S3_REGION_NAME', 'auto')
-        self.use_ssl = getattr(settings, 'AWS_S3_USE_SSL', True)
+        """Khởi tạo với MEDIA_ROOT từ settings"""
+        self.media_root = getattr(settings, 'MEDIA_ROOT', None)
+        if not self.media_root:
+            raise ValueError("MEDIA_ROOT chưa được cấu hình trong settings.py")
         
-        if not all([self.access_key, self.secret_key, self.bucket_name]):
-            raise ValueError("Object Storage credentials chưa được cấu hình trong settings.py")
-        
-        # Tạo S3 client
-        self.s3_client = boto3.client(
-            's3',
-            endpoint_url=self.endpoint_url,
-            aws_access_key_id=self.access_key,
-            aws_secret_access_key=self.secret_key,
-            region_name=self.region,
-            use_ssl=self.use_ssl,
-            verify=getattr(settings, 'AWS_S3_VERIFY', True),
-        )
+        # Tạo thư mục nếu chưa tồn tại
+        Path(self.media_root).mkdir(parents=True, exist_ok=True)
     
     def upload_file(
         self,
@@ -50,14 +34,14 @@ class ObjectStorageService:
         visibility: str = 'PRIVATE'
     ) -> Dict:
         """
-        Upload file lên Object Storage
+        Upload file lên Local Storage
         
         Args:
             file: Django UploadedFile object
             storage_key: Key/path trên storage (ví dụ: media/lessons/lesson-1/image.jpg)
             content_type: MIME type (auto-detect nếu None)
-            metadata: Custom metadata dict
-            visibility: 'PUBLIC' hoặc 'PRIVATE'
+            metadata: Custom metadata dict (không dùng cho local storage)
+            visibility: 'PUBLIC' hoặc 'PRIVATE' (không áp dụng cho local storage)
         
         Returns:
             Dict với thông tin file đã upload
@@ -69,31 +53,20 @@ class ObjectStorageService:
                 if not content_type:
                     content_type = 'application/octet-stream'
             
-            # Extra args cho upload
-            extra_args = {
-                'ContentType': content_type,
-            }
+            # Tạo đường dẫn đầy đủ
+            file_path = os.path.join(self.media_root, storage_key)
             
-            # Set ACL nếu PUBLIC
-            if visibility == 'PUBLIC':
-                extra_args['ACL'] = 'public-read'
+            # Tạo thư mục nếu chưa tồn tại
+            file_dir = os.path.dirname(file_path)
+            Path(file_dir).mkdir(parents=True, exist_ok=True)
             
-            # Add metadata
-            if metadata:
-                extra_args['Metadata'] = metadata
-            
-            # Upload file
-            self.s3_client.upload_fileobj(
-                file,
-                self.bucket_name,
-                storage_key,
-                ExtraArgs=extra_args
-            )
+            # Lưu file
+            with open(file_path, 'wb+') as destination:
+                for chunk in file.chunks():
+                    destination.write(chunk)
             
             # Get file size
-            file.seek(0, 2)  # Seek to end
-            file_size = file.tell()
-            file.seek(0)  # Reset
+            file_size = os.path.getsize(file_path)
             
             return {
                 'success': True,
@@ -101,15 +74,9 @@ class ObjectStorageService:
                 'file_name': file.name,
                 'file_size': file_size,
                 'content_type': content_type,
-                'bucket': self.bucket_name,
+                'file_path': file_path,
             }
         
-        except ClientError as e:
-            return {
-                'success': False,
-                'error': str(e),
-                'error_code': e.response.get('Error', {}).get('Code', 'Unknown'),
-            }
         except Exception as e:
             return {
                 'success': False,
@@ -123,7 +90,7 @@ class ObjectStorageService:
         delimiter: str = '/'
     ) -> Dict:
         """
-        List files trong bucket theo prefix (folder)
+        List files trong MEDIA_ROOT theo prefix (folder)
         
         Args:
             prefix: Prefix/folder path (ví dụ: 'media/lessons/')
@@ -134,47 +101,66 @@ class ObjectStorageService:
             Dict với danh sách files và folders
         """
         try:
-            response = self.s3_client.list_objects_v2(
-                Bucket=self.bucket_name,
-                Prefix=prefix,
-                MaxKeys=max_keys,
-                Delimiter=delimiter,
-            )
-            
             files = []
             folders = []
             
-            # Files
-            if 'Contents' in response:
-                for obj in response['Contents']:
-                    files.append({
-                        'key': obj['Key'],
-                        'size': obj['Size'],
-                        'last_modified': obj['LastModified'].isoformat(),
-                        'storage_class': obj.get('StorageClass', 'STANDARD'),
-                    })
+            # Tạo đường dẫn đầy đủ
+            search_path = os.path.join(self.media_root, prefix) if prefix else self.media_root
             
-            # Folders (CommonPrefixes)
-            if 'CommonPrefixes' in response:
-                for prefix_obj in response['CommonPrefixes']:
+            if not os.path.exists(search_path):
+                return {
+                    'success': True,
+                    'files': [],
+                    'folders': [],
+                    'prefix': prefix,
+                    'is_truncated': False,
+                }
+            
+            count = 0
+            for root, dirs, filenames in os.walk(search_path):
+                # Tính relative path từ media_root
+                rel_root = os.path.relpath(root, self.media_root)
+                if rel_root == '.':
+                    rel_root = ''
+                else:
+                    rel_root = rel_root.replace('\\', '/') + '/'
+                
+                # Add folders
+                for dir_name in dirs:
+                    if count >= max_keys:
+                        break
+                    folder_prefix = os.path.join(rel_root, dir_name).replace('\\', '/') + '/'
                     folders.append({
-                        'prefix': prefix_obj['Prefix'],
+                        'prefix': folder_prefix,
                     })
+                    count += 1
+                
+                # Add files
+                for filename in filenames:
+                    if count >= max_keys:
+                        break
+                    file_key = os.path.join(rel_root, filename).replace('\\', '/')
+                    file_path = os.path.join(root, filename)
+                    
+                    files.append({
+                        'key': file_key,
+                        'size': os.path.getsize(file_path),
+                        'last_modified': os.path.getmtime(file_path),
+                        'storage_class': 'STANDARD',
+                    })
+                    count += 1
+                
+                if count >= max_keys:
+                    break
             
             return {
                 'success': True,
                 'files': files,
                 'folders': folders,
                 'prefix': prefix,
-                'is_truncated': response.get('IsTruncated', False),
+                'is_truncated': count >= max_keys,
             }
         
-        except ClientError as e:
-            return {
-                'success': False,
-                'error': str(e),
-                'error_code': e.response.get('Error', {}).get('Code', 'Unknown'),
-            }
         except Exception as e:
             return {
                 'success': False,
@@ -183,7 +169,7 @@ class ObjectStorageService:
     
     def delete_file(self, storage_key: str) -> Dict:
         """
-        Xóa file khỏi Object Storage
+        Xóa file khỏi Local Storage
         
         Args:
             storage_key: Key/path của file cần xóa
@@ -192,22 +178,20 @@ class ObjectStorageService:
             Dict với kết quả
         """
         try:
-            self.s3_client.delete_object(
-                Bucket=self.bucket_name,
-                Key=storage_key
-            )
+            file_path = os.path.join(self.media_root, storage_key)
             
-            return {
-                'success': True,
-                'storage_key': storage_key,
-            }
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                return {
+                    'success': True,
+                    'storage_key': storage_key,
+                }
+            else:
+                return {
+                    'success': False,
+                    'error': 'File không tồn tại',
+                }
         
-        except ClientError as e:
-            return {
-                'success': False,
-                'error': str(e),
-                'error_code': e.response.get('Error', {}).get('Code', 'Unknown'),
-            }
         except Exception as e:
             return {
                 'success': False,
@@ -221,25 +205,23 @@ class ObjectStorageService:
         http_method: str = 'GET'
     ) -> Dict:
         """
-        Tạo Presigned URL có thời hạn
+        Tạo URL cho file (local storage không cần presigned URL)
         
         Args:
             storage_key: Key/path của file
-            expiration: Thời gian hết hạn (giây), default 1 giờ
-            http_method: HTTP method ('GET' hoặc 'PUT')
+            expiration: Thời gian hết hạn (giây) - không áp dụng cho local
+            http_method: HTTP method - không áp dụng cho local
         
         Returns:
-            Dict với presigned URL
+            Dict với URL
         """
         try:
-            url = self.s3_client.generate_presigned_url(
-                'get_object' if http_method == 'GET' else 'put_object',
-                Params={
-                    'Bucket': self.bucket_name,
-                    'Key': storage_key,
-                },
-                ExpiresIn=expiration
-            )
+            # Tạo URL từ MEDIA_URL
+            media_url = getattr(settings, 'MEDIA_URL', '/media/')
+            if not media_url.endswith('/'):
+                media_url += '/'
+            
+            url = f"{media_url}{storage_key}"
             
             return {
                 'success': True,
@@ -248,12 +230,6 @@ class ObjectStorageService:
                 'storage_key': storage_key,
             }
         
-        except ClientError as e:
-            return {
-                'success': False,
-                'error': str(e),
-                'error_code': e.response.get('Error', {}).get('Code', 'Unknown'),
-            }
         except Exception as e:
             return {
                 'success': False,
@@ -266,27 +242,18 @@ class ObjectStorageService:
         
         Args:
             storage_key: Key/path của file
-            public: True nếu file là public (không cần signed URL)
+            public: True nếu file là public (không áp dụng cho local)
         
         Returns:
             URL string hoặc None
         """
-        if public:
-            # Public URL
-            if self.endpoint_url:
-                # Custom endpoint (MinIO, OB VN, etc.)
-                if self.endpoint_url.startswith('http'):
-                    base_url = self.endpoint_url.rstrip('/')
-                else:
-                    base_url = f"https://{self.endpoint_url}"
-                return f"{base_url}/{self.bucket_name}/{storage_key}"
-            else:
-                # AWS S3 standard
-                return f"https://{self.bucket_name}.s3.amazonaws.com/{storage_key}"
-        else:
-            # Private - cần signed URL
-            result = self.generate_presigned_url(storage_key, expiration=3600)
-            return result.get('url') if result.get('success') else None
+        try:
+            media_url = getattr(settings, 'MEDIA_URL', '/media/')
+            if not media_url.endswith('/'):
+                media_url += '/'
+            return f"{media_url}{storage_key}"
+        except:
+            return None
     
     def file_exists(self, storage_key: str) -> bool:
         """
@@ -298,14 +265,12 @@ class ObjectStorageService:
         Returns:
             True nếu file tồn tại
         """
-        try:
-            self.s3_client.head_object(
-                Bucket=self.bucket_name,
-                Key=storage_key
-            )
-            return True
-        except ClientError:
-            return False
+        file_path = os.path.join(self.media_root, storage_key)
+        return os.path.exists(file_path)
+
+
+# Alias để tương thích với code cũ
+ObjectStorageService = LocalStorageService
 
 
 def get_file_type_from_name(file_name: str) -> str:
@@ -332,4 +297,3 @@ def get_file_type_from_name(file_name: str) -> str:
         return 'PDF'
     else:
         return 'OTHER'
-

@@ -166,26 +166,6 @@ SIMPLE_JWT = {
     'UPDATE_LAST_LOGIN': True,
 }
 
-# Object Storage (S3-compatible) configuration
-USE_S3 = True
-
-if USE_S3:
-    # AWS S3 / MinIO / S3-compatible
-    AWS_ACCESS_KEY_ID = os.getenv('OBJECT_STORAGE_ACCESS_KEY')
-    AWS_SECRET_ACCESS_KEY = os.getenv('OBJECT_STORAGE_SECRET_KEY')
-    AWS_STORAGE_BUCKET_NAME = os.getenv('OBJECT_STORAGE_BUCKET')
-    AWS_S3_ENDPOINT_URL = os.getenv('OBJECT_STORAGE_ENDPOINT')
-    AWS_S3_REGION_NAME = os.getenv('OBJECT_STORAGE_REGION', 'auto')
-    AWS_S3_USE_SSL = True
-    AWS_S3_VERIFY = True
-    
-    # Static & Media files
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
-    
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_ENDPOINT_URL}'
-    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
-else:
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# Media files configuration (Local storage)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
