@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import axios from '@/lib/axios';
+import { markLessonCompleteForStudent } from '@/services/robotics';
 import {
   ArrowLeft,
   Users,
@@ -18,6 +19,8 @@ interface ClassDetail {
   name: string;
   code: string;
   subcourse_title: string;
+  subcourse: number;
+  subcourse_slug: string;
   status: string;
   status_display: string;
   start_date: string;
@@ -37,6 +40,7 @@ interface StudentProgress {
   completion_percentage: number;
   last_activity: string | null;
   last_lesson: string | null;
+  completed_lesson_slugs: string[];
 }
 
 export default function ClassDetailPage() {
@@ -46,6 +50,9 @@ export default function ClassDetailPage() {
 
   const [classDetail, setClassDetail] = useState<ClassDetail | null>(null);
   const [students, setStudents] = useState<StudentProgress[]>([]);
+  const [lessons, setLessons] = useState<{ id: number; title: string; slug: string; sort_order: number }[]>([]);
+  const [selectedLessons, setSelectedLessons] = useState<Record<number, string>>({});
+  const [markingState, setMarkingState] = useState<Record<number, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'progress'>('overview');
@@ -61,6 +68,9 @@ export default function ClassDetailPage() {
     try {
       const response = await axios.get(`/classes/${classId}/`);
       setClassDetail(response.data);
+      if (response.data?.subcourse) {
+        fetchLessons(response.data.subcourse);
+      }
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Không thể tải thông tin lớp học');
       console.error('Error fetching class:', err);
@@ -77,6 +87,21 @@ export default function ClassDetailPage() {
       console.error('Error fetching progress:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchLessons = async (subcourseId: number) => {
+    try {
+      const response = await axios.get('/content/lessons/', {
+        params: { subcourse: subcourseId, page_size: 100, ordering: 'sort_order' },
+      });
+      // DRF pagination may wrap results under results
+      const data = Array.isArray(response.data) ? response.data : response.data?.results || [];
+      setLessons(
+        data.map((l: any) => ({ id: l.id, title: l.title, slug: l.slug, sort_order: l.sort_order }))
+      );
+    } catch (err) {
+      console.error('Error fetching lessons:', err);
     }
   };
 
@@ -332,6 +357,19 @@ export default function ClassDetailPage() {
                       </div>
                     ) : (
                       <div className="space-y-4">
+                        {/* Lesson selector (shared) */}
+                        {classDetail?.subcourse && lessons.length === 0 && (
+                          <div className="p-4 rounded-lg border border-gray-200 bg-gray-50">
+                            <p className="text-sm text-gray-700">Đang tải danh sách bài học...</p>
+                          </div>
+                        )}
+                        {classDetail?.subcourse && lessons.length > 0 && (
+                          <div className="p-4 rounded-lg border border-gray-200 bg-gray-50">
+                            <p className="text-sm text-gray-700 mb-2">
+                              Chọn bài học để đánh dấu hoàn thành cho từng học viên
+                            </p>
+                          </div>
+                        )}
                         {students.map((student) => (
                           <div
                             key={student.student_id}
@@ -385,6 +423,75 @@ export default function ClassDetailPage() {
                                 <p className="text-xs text-gray-600">
                                   Bài cuối cùng: <span className="font-medium">{student.last_lesson}</span>
                                 </p>
+                              </div>
+                            )}
+
+                            {/* Teacher action: mark lesson complete for this student */}
+                            {lessons.length > 0 && (
+                              <div className="mt-4 pt-3 border-t border-gray-200">
+                                <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                                  <select
+                                    className="w-full sm:w-auto  px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white text-gray-900 font-medium"
+                                    value={selectedLessons[student.student_id] || ''}
+                                    onChange={(e) =>
+                                      setSelectedLessons((prev) => ({
+                                        ...prev,
+                                        [student.student_id]: e.target.value,
+                                      }))
+                                    }
+                                  >
+                                    <option value="" className="text-gray-900 bg-white">-- Chọn bài học --</option>
+                                    {lessons.map((lesson) => {
+                                      const isCompleted = student.completed_lesson_slugs?.includes(lesson.slug);
+                                      return (
+                                        <option 
+                                          key={lesson.id} 
+                                          value={lesson.slug} 
+                                          className={`${isCompleted ? 'text-green-700 font-semibold' : 'text-gray-900'} bg-white`}
+                                        >
+                                          {isCompleted ? '✓ ' : ''}
+                                          {lesson.sort_order ? `${lesson.sort_order}. ` : ''}
+                                          {lesson.title}
+                                        </option>
+                                      );
+                                    })}
+                                  </select>
+                                  <button
+                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                      markingState[student.student_id]
+                                        ? 'bg-gray-200 text-gray-600 cursor-wait'
+                                        : 'bg-green-600 text-white hover:bg-green-700'
+                                    }`}
+                                    disabled={
+                                      markingState[student.student_id] || !selectedLessons[student.student_id]
+                                    }
+                                    onClick={async () => {
+                                      const slug = selectedLessons[student.student_id];
+                                      if (!slug) return;
+                                      try {
+                                        setMarkingState((prev) => ({ ...prev, [student.student_id]: true }));
+                                        const result = await markLessonCompleteForStudent(
+                                          classId,
+                                          student.student_id,
+                                          slug
+                                        );
+                                        if (result?.success) {
+                                          // Refresh progress list to reflect updated stats
+                                          await fetchStudentProgress();
+                                        } else {
+                                          alert('❌ ' + (result?.error || 'Không thể cập nhật'));
+                                        }
+                                      } catch (err) {
+                                        console.error('Mark complete error:', err);
+                                        alert('❌ Có lỗi xảy ra. Vui lòng thử lại.');
+                                      } finally {
+                                        setMarkingState((prev) => ({ ...prev, [student.student_id]: false }));
+                                      }
+                                    }}
+                                  >
+                                    {markingState[student.student_id] ? 'Đang lưu...' : 'Đánh dấu hoàn thành'}
+                                  </button>
+                                </div>
                               </div>
                             )}
                           </div>

@@ -538,6 +538,8 @@ class Preparation(models.Model):
     build_blocks = models.ManyToManyField(
         'BuildBlock',
         blank=True,
+        through='PreparationBuildBlock',
+        through_fields=('preparation', 'build_block'),
         related_name='used_in_preparations',
         verbose_name='Các khối xây dựng chuẩn bị',
         help_text='Chọn các build blocks cần hiển thị trong phần chuẩn bị'
@@ -580,8 +582,8 @@ class BuildBlock(models.Model):
         max_length=500,
         blank=True,
         null=True,
-        verbose_name='Link PDF',
-        help_text='Link PDF hướng dẫn xây dựng (optional)'
+        verbose_name='Link ảnh  ',
+        help_text='Link PDF hoặc PNG'
     )
     order = models.PositiveIntegerField(
         default=0,
@@ -602,6 +604,43 @@ class BuildBlock(models.Model):
     
     def __str__(self):
         return f"{self.program.title} - Build Block: {self.title}"
+
+
+class PreparationBuildBlock(models.Model):
+    """Bảng trung gian giữa Preparation và BuildBlock kèm số lượng."""
+    preparation = models.ForeignKey(
+        Preparation,
+        on_delete=models.CASCADE,
+        db_column='preparation_id',
+        related_name='preparation_build_blocks',
+        verbose_name='Chuẩn bị'
+    )
+    build_block = models.ForeignKey(
+        BuildBlock,
+        on_delete=models.CASCADE,
+        db_column='buildblock_id',
+        related_name='preparation_build_blocks',
+        verbose_name='Khối xây dựng'
+    )
+    quantity = models.PositiveIntegerField(
+        default=1,
+        verbose_name='Số lượng cần chuẩn bị',
+        help_text='Số lượng khối cần chuẩn bị cho bài học'
+    )
+
+    class Meta:
+        db_table = 'preparations_build_blocks'
+        verbose_name = 'Khối chuẩn bị'
+        verbose_name_plural = 'Khối chuẩn bị'
+        unique_together = ('preparation', 'build_block')
+        ordering = ['preparation', 'build_block__order', 'id']
+        indexes = [
+            models.Index(fields=['preparation']),
+            models.Index(fields=['build_block']),
+        ]
+
+    def __str__(self):
+        return f"{self.preparation} - {self.build_block} (x{self.quantity})"
 
 
 class LessonContentBlock(models.Model):

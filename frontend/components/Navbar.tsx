@@ -81,8 +81,8 @@ export default function Navbar() {
     menuItems.push({ name: 'Khóa học của tôi', href: '/my-courses', icon: BookOpen });
   }
 
-  // Thêm menu cho teacher
-  if (userRole === 'TEACHER') {
+  // Thêm menu cho teacher/admin
+  if (userRole === 'TEACHER' || userRole === 'ADMIN') {
     menuItems.push({ name: 'Bảng điều khiển', href: '/teacher', icon: Users });
   }
 

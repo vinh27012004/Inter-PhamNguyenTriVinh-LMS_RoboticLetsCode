@@ -15,9 +15,15 @@ interface BuildBlock {
   order: number;
 }
 
+interface PreparationBuildBlock {
+  id: number;
+  quantity: number;
+  build_block: BuildBlock;
+}
+
 interface Preparation {
   id: number;
-  build_blocks: BuildBlock[];
+  build_blocks: PreparationBuildBlock[];
   created_at: string;
 }
 
@@ -47,16 +53,24 @@ export default function PreparationSection({ preparation }: PreparationSectionPr
 
       <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
         {preparation.build_blocks
-          .sort((a, b) => a.order - b.order)
-          .map((block) => {
+          .sort((a, b) => a.build_block.order - b.build_block.order)
+          .map((item) => {
+            const block = item.build_block;
+            if (!block) return null;
+
             const hasPdfUrl = block.pdf_url;
             const isPdfUrlImage = hasPdfUrl ? isImageUrl(block.pdf_url!) : false;
 
             return (
-              <div key={block.id} className="bg-gray-50 rounded-lg p-5 border border-gray-200 hover:border-orange-500 transition-colors">
+              <div key={item.id} className="bg-gray-50 rounded-lg p-5 border border-gray-200 hover:border-orange-500 transition-colors">
                 <div className="flex items-center gap-2 mb-3">
                   <FileText className="w-5 h-5 text-orange-600" />
                   <h3 className="font-semibold text-gray-900">{block.title}</h3>
+                </div>
+                <div className="flex items-center gap-2 mb-3 text-sm text-gray-700">
+                  <div className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full font-medium">
+                    Số lượng: {item.quantity}
+                  </div>
                 </div>
                 
                 {block.description && (

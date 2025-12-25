@@ -8,7 +8,7 @@ from rest_framework import serializers
 from .models import (
     Program, Subcourse, Lesson, UserProgress,
     Media, LessonObjective, LessonModel, AssemblyGuide, Preparation,
-    BuildBlock, LessonContentBlock, LessonAttachment,
+    BuildBlock, PreparationBuildBlock, LessonContentBlock, LessonAttachment,
     Challenge, Quiz, QuizQuestion, QuestionOption,
     QuizSubmission, QuizAnswer
 )
@@ -402,9 +402,27 @@ class BuildBlockSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_at']
 
 
+class PreparationBuildBlockSerializer(serializers.ModelSerializer):
+    """Serializer cho bảng trung gian Preparation - BuildBlock (có số lượng)."""
+    build_block = BuildBlockSerializer(read_only=True)
+
+    class Meta:
+        model = PreparationBuildBlock
+        fields = [
+            'id',
+            'build_block',
+            'quantity',
+        ]
+        read_only_fields = ['id']
+
+
 class PreparationSerializer(serializers.ModelSerializer):
     """Serializer cho Chuẩn bị bài học - Nhiều BuildBlocks"""
-    build_blocks = BuildBlockSerializer(many=True, read_only=True)
+    build_blocks = PreparationBuildBlockSerializer(
+        source='preparation_build_blocks',
+        many=True,
+        read_only=True
+    )
     
     class Meta:
         model = Preparation

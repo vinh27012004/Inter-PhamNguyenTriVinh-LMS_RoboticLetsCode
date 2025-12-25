@@ -11,7 +11,7 @@ from django.utils.safestring import mark_safe
 from .models import (
     Program, Subcourse, Lesson, UserProgress,
     Media, LessonObjective, LessonModel, AssemblyGuide, Preparation,
-    BuildBlock, LessonContentBlock, LessonAttachment,
+    BuildBlock, PreparationBuildBlock, LessonContentBlock, LessonAttachment,
     Challenge, Quiz, QuizQuestion, QuestionOption,
     QuizSubmission, QuizAnswer
 )
@@ -693,6 +693,16 @@ class LessonModelAdmin(admin.ModelAdmin):
     media_count.short_description = 'Media'
 
 
+class PreparationBuildBlockInline(admin.TabularInline):
+    """Inline để nhập số lượng build block cho mỗi preparation."""
+    model = PreparationBuildBlock
+    extra = 0
+    min_num = 0
+    fields = ('build_block', 'quantity')
+    autocomplete_fields = ['build_block']
+    ordering = ('build_block__order',)
+
+
 @admin.register(Preparation)
 class PreparationAdmin(admin.ModelAdmin):
     """Admin cho Chuẩn bị bài học"""
@@ -710,16 +720,12 @@ class PreparationAdmin(admin.ModelAdmin):
     search_fields = [
         'lesson__title',
     ]
-    
-    filter_horizontal = ['build_blocks']
-    
+    inlines = [PreparationBuildBlockInline]
+
     fieldsets = (
         ('Bài học', {
-            'fields': ('lesson',)
-        }),
-        ('Khối chuẩn bị', {
-            'fields': ('build_blocks',),
-            'description': 'Chọn các build blocks cần hiển thị trong phần chuẩn bị'
+            'fields': ('lesson',),
+            'description': 'Chọn bài học, sau đó thêm Build Blocks cùng số lượng ở bảng bên dưới'
         }),
     )
     

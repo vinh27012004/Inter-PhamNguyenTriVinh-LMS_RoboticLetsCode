@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
+from django.utils import timezone
 
 from .models import Class, ClassTeacher, ClassEnrollment
 from .serializers import (
@@ -107,6 +108,15 @@ class ClassViewSet(viewsets.ModelViewSet):
                 lesson__in=lessons
             ).order_by('-updated_at').first()
             
+            # Lấy danh sách slug của các bài học đã hoàn thành
+            completed_lesson_slugs = list(
+                UserProgress.objects.filter(
+                    user=enrollment.student,
+                    lesson__in=lessons,
+                    is_completed=True
+                ).values_list('lesson__slug', flat=True)
+            )
+            
             total_lessons = lessons.count()
             completion_percentage = (completed_lessons / total_lessons * 100) if total_lessons > 0 else 0
             
@@ -121,6 +131,7 @@ class ClassViewSet(viewsets.ModelViewSet):
                 'completion_percentage': round(completion_percentage, 2),
                 'last_activity': last_progress.updated_at if last_progress else None,
                 'last_lesson': last_progress.lesson.title if last_progress else None,
+                'completed_lesson_slugs': completed_lesson_slugs,
             })
         
         return Response(results)
@@ -174,6 +185,84 @@ class ClassViewSet(viewsets.ModelViewSet):
         
         serializer = ClassEnrollmentSerializer(enrollment)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['post'])
+    def mark_lesson_complete(self, request, pk=None):
+        """
+        Giáo viên/Quản trị đánh dấu hoàn thành bài học cho HỌC VIÊN trong lớp.
+        POST /api/classes/{id}/mark_lesson_complete/
+        Body: {"student_id": 123, "lesson_slug": "intro-motors"}
+        """
+        # Kiểm tra quyền: chỉ ADMIN/TEACHER
+        if not (request.user.is_staff or 
+                (hasattr(request.user, 'profile') and request.user.profile.role in ['ADMIN', 'TEACHER'])):
+            return Response(
+                {'error': 'Bạn không có quyền cập nhật tiến độ học viên'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        class_obj = self.get_object()
+        student_id = request.data.get('student_id')
+        lesson_slug = request.data.get('lesson_slug')
+
+        if not student_id or not lesson_slug:
+            return Response(
+                {'error': 'Thiếu student_id hoặc lesson_slug'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Xác thực học viên thuộc lớp và đang ACTIVE
+        enrollment = class_obj.enrollments.filter(student_id=student_id, status='ACTIVE').first()
+        if not enrollment:
+            return Response(
+                {'error': 'Học viên không thuộc lớp hoặc chưa được ghi danh'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Xác thực bài học thuộc subcourse của lớp
+        from content.models import Lesson, UserProgress
+        try:
+            lesson = Lesson.objects.get(slug=lesson_slug, subcourse=class_obj.subcourse, status='PUBLISHED')
+        except Lesson.DoesNotExist:
+            return Response(
+                {'error': 'Không tìm thấy bài học trong khóa học của lớp'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Cập nhật hoặc tạo UserProgress cho học viên
+        progress, created = UserProgress.objects.update_or_create(
+            user_id=student_id,
+            lesson=lesson,
+            defaults={
+                'is_completed': True,
+                'completed_at': timezone.now()
+            }
+        )
+
+        # Tính phần trăm hoàn thành cho học viên trong subcourse
+        total_lessons = class_obj.subcourse.lessons.filter(status='PUBLISHED').count()
+        completed_lessons = UserProgress.objects.filter(
+            user_id=student_id,
+            lesson__subcourse=class_obj.subcourse,
+            is_completed=True
+        ).count()
+
+        completion_percentage = (completed_lessons / total_lessons * 100) if total_lessons > 0 else 0
+
+        return Response({
+            'success': True,
+            'message': 'Đã đánh dấu hoàn thành bài học cho học viên',
+            'progress': {
+                'student_id': student_id,
+                'lesson_id': lesson.id,
+                'lesson_title': lesson.title,
+                'is_completed': progress.is_completed,
+                'completed_at': progress.completed_at,
+                'total_lessons': total_lessons,
+                'completed_lessons': completed_lessons,
+                'completion_percentage': round(completion_percentage, 2)
+            }
+        }, status=status.HTTP_200_OK)
 
 
 class ClassEnrollmentViewSet(viewsets.ModelViewSet):

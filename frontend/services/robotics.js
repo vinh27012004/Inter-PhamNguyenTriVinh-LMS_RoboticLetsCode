@@ -144,6 +144,33 @@ export const markLessonComplete = async (lessonSlug) => {
 };
 
 /**
+ * Giáo viên/Quản trị: Đánh dấu bài học hoàn thành cho học viên trong lớp
+ * POST /api/classes/{classId}/mark_lesson_complete/
+ * Body: { student_id, lesson_slug }
+ */
+export const markLessonCompleteForStudent = async (classId, studentId, lessonSlug) => {
+  try {
+    const url = `/classes/${classId}/mark_lesson_complete/`;
+    const response = await axiosInstance.post(url, {
+      student_id: studentId,
+      lesson_slug: lessonSlug,
+    });
+    return {
+      success: true,
+      data: response.data,
+      status: response.status,
+    };
+  } catch (error) {
+    console.error(`Error marking lesson ${lessonSlug} complete for student ${studentId}:`, error);
+    return {
+      success: false,
+      error: error.response?.data?.detail || error.response?.data?.error || error.message,
+      status: error.response?.status,
+    };
+  }
+};
+
+/**
  * Lấy tiến độ học tập của user
  * GET /api/content/progress/
  */
