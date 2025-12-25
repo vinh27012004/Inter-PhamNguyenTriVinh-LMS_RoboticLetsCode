@@ -16,6 +16,7 @@ urlpatterns = [
     path('api/content/', include('content.urls')),
     path('api/auth/', include('user_auth.urls')),
     path('api/', include('classes.urls')),  # Classes management
+    path('api/storage/', include('storage_management.urls')),  # Storage management
     
     # JWT Authentication
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

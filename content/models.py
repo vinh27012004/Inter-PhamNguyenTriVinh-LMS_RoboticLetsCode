@@ -728,7 +728,7 @@ class LessonAttachment(models.Model):
     name = models.CharField(max_length=255, verbose_name='Tên file')
     file = models.FileField(upload_to='lessons/attachments/', verbose_name='File')
     file_type = models.CharField(
-        max_length=20,  # ⭐ Tăng từ 10 lên 20 để fit 'video' (5), 'image' (5), 'other' (5)
+        max_length=20,
         choices=[
             ('pdf', 'PDF'),
             ('image', 'Ảnh'),
