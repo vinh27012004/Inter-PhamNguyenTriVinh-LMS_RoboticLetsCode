@@ -724,67 +724,36 @@ class LessonAttachment(models.Model):
     Tệp đính kèm (File, Code, Document)
     Có thể tải xuống hoặc xem trực tiếp
     """
-    FILE_TYPE_CHOICES = [
-        ('code', 'Code/Script'),
-        ('document', 'Document (PDF, DOCX)'),
-        ('spreadsheet', 'Bảng tính (XLSX)'),
-        ('archive', 'File nén (ZIP)'),
-        ('media', 'Media (MP3, MP4)'),
-        ('other', 'File khác'),
-    ]
-    
-    lesson = models.ForeignKey(
-        Lesson,
-        on_delete=models.CASCADE,
-        related_name='attachments',
-        verbose_name='Bài học'
-    )
-    file_url = models.URLField(
-        max_length=500,
-        verbose_name='URL File',
-        help_text='URL tải file từ Object Storage'
-    )
-    name = models.CharField(
-        max_length=255,
-        verbose_name='Tên file',
-        help_text='Tên hiển thị cho người dùng'
-    )
-    description = models.TextField(
-        blank=True,
-        verbose_name='Mô tả',
-        help_text='Giải thích file này là gì, dùng để làm gì'
-    )
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='attachments')
+    name = models.CharField(max_length=255, verbose_name='Tên file')
+    file = models.FileField(upload_to='lessons/attachments/', verbose_name='File')
     file_type = models.CharField(
-        max_length=20,
-        choices=FILE_TYPE_CHOICES,
-        default='other',
+        max_length=20,  # ⭐ Tăng từ 10 lên 20 để fit 'video' (5), 'image' (5), 'other' (5)
+        choices=[
+            ('pdf', 'PDF'),
+            ('image', 'Ảnh'),
+            ('video', 'Video'),
+            ('code', 'Code'),
+            ('other', 'Khác'),
+        ],
         verbose_name='Loại file'
     )
-    file_size_kb = models.IntegerField(
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(1)],
-        verbose_name='Dung lượng (KB)'
-    )
-    order = models.PositiveIntegerField(
-        default=0,
-        verbose_name='Thứ tự'
-    )
-    
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Ngày tạo')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='Ngày cập nhật')
+    file_size_kb = models.IntegerField(default=0, verbose_name='Kích thước (KB)')
+    description = models.TextField(blank=True, verbose_name='Mô tả')
+    order = models.IntegerField(default=0, verbose_name='Thứ tự')
     
     class Meta:
-        db_table = 'lesson_attachments'
         verbose_name = 'Tệp đính kèm'
         verbose_name_plural = 'Tệp đính kèm'
-        ordering = ['lesson', 'order']
-        indexes = [
-            models.Index(fields=['lesson', 'file_type']),
-        ]
+        ordering = ['order']
     
     def __str__(self):
-        return f"{self.lesson.title} - {self.name}"
+        return self.name
+    
+    def save(self, *args, **kwargs):
+        if self.file:
+            self.file_size_kb = self.file.size // 1024
+        super().save(*args, **kwargs)
 
 
 class Challenge(models.Model):

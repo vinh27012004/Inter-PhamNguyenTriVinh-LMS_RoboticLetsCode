@@ -469,12 +469,14 @@ class LessonAttachmentSerializer(serializers.ModelSerializer):
         source='get_file_type_display',
         read_only=True
     )
+    file_url = serializers.SerializerMethodField()
     
     class Meta:
         model = LessonAttachment
         fields = [
             'id',
             'lesson',
+            'file',
             'file_url',
             'name',
             'description',
@@ -485,6 +487,12 @@ class LessonAttachmentSerializer(serializers.ModelSerializer):
             'created_at',
         ]
         read_only_fields = ['id', 'created_at']
+    
+    def get_file_url(self, obj):
+        """Trả về URL của file từ S3 hoặc local storage"""
+        if obj.file:
+            return obj.file.url
+        return None
 
 
 class ChallengeSerializer(serializers.ModelSerializer):

@@ -128,9 +128,9 @@ class LessonAttachmentInline(admin.TabularInline):
     """Inline quản lý Tệp đính kèm"""
     model = LessonAttachment
     extra = 1
-    fields = ['name', 'file_url', 'file_type', 'file_size_kb', 'order']
+    fields = ['name', 'file', 'file_type', 'file_size_kb', 'order']
     verbose_name = 'Tệp đính kèm'
-    verbose_name_plural = 'Tệp đính kèm (Files)'
+    verbose_name_plural = 'Tệp đính kèm'
     ordering = ['order']
 
 
@@ -860,8 +860,7 @@ class LessonAttachmentAdmin(admin.ModelAdmin):
     list_display = [
         'lesson',
         'name',
-        'file_type_badge',
-        'file_size_display',
+        'file_type',
         'file_link',
         'order',
     ]
@@ -885,49 +884,22 @@ class LessonAttachmentAdmin(admin.ModelAdmin):
             'fields': ('lesson',)
         }),
         ('Thông tin file', {
-            'fields': ('name', 'file_url', 'file_type', 'file_size_kb', 'description', 'order')
+            'fields': ('name', 'file', 'file_type', 'file_size_kb', 'description', 'order')
         }),
     )
     
     list_per_page = 50
     ordering = ['lesson', 'order']
     
-    def file_type_badge(self, obj):
-        """Hiển thị loại file với icon"""
-        icons = {
-            'code': '💻',
-            'document': '📄',
-            'spreadsheet': '📊',
-            'archive': '📦',
-            'media': '🎬',
-            'other': '📎',
-        }
-        icon = icons.get(obj.file_type, '📁')
-        return format_html(
-            '{} {}',
-            icon,
-            obj.get_file_type_display()
-        )
-    file_type_badge.short_description = 'Loại file'
-    
-    def file_size_display(self, obj):
-        """Hiển thị dung lượng file"""
-        if obj.file_size_kb:
-            if obj.file_size_kb < 1024:
-                return f'{obj.file_size_kb} KB'
-            else:
-                mb = obj.file_size_kb / 1024
-                return f'{mb:.1f} MB'
-        return '-'
-    file_size_display.short_description = 'Dung lượng'
-    
     def file_link(self, obj):
-        """Link download file"""
-        return format_html(
-            '<a href="{}" target="_blank">⬇️ Download</a>',
-            obj.file_url
-        )
-    file_link.short_description = 'Link'
+        """Link download file từ S3"""
+        if obj.file:
+            return format_html(
+                '<a href="{}" target="_blank">⬇️ Download</a>',
+                obj.file.url
+            )
+        return '—'
+    file_link.short_description = 'File'
 
 
 @admin.register(AssemblyGuide)
@@ -1269,7 +1241,7 @@ class QuestionOptionAdmin(admin.ModelAdmin):
         """Hiển thị đúng/sai"""
         if obj.is_correct:
             return format_html('<span style="color: green; font-weight: bold;">✓ Đúng</span>')
-        return format_html('<span style="color: #999;">○ Sai</span>')
+        return format_html('<span style="color: red;">✗ Sai</span>')
     is_correct_badge.short_description = 'Trạng thái'
 
 
@@ -1404,6 +1376,4 @@ class QuizAnswerAdmin(admin.ModelAdmin):
 # TUỲ CHỈNH ADMIN SITE
 # ============================================================================
 
-admin.site.site_header = 'E-Robotic Let\'s Code - Quản trị'
-admin.site.site_title = 'Admin Panel'
-admin.site.index_title = 'Bảng điều khiển quản trị'
+admin.site.site_header = 'E-Robotic Let'
