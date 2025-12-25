@@ -46,7 +46,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-28">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-20">
       {/* Hero Section */}
       <div className="text-center mb-16 relative">
         {/* Mascot Left - Bay tự do quanh trang */}

@@ -17,7 +17,6 @@ import {
   FileText, 
   Trophy, 
   Brain,
-  CheckCircle,
   Menu,
   X,
   ChevronLeft,
@@ -25,7 +24,7 @@ import {
 } from 'lucide-react';
 
 // Import services directly
-import { getLessonFullDetail, markLessonComplete } from '@/services/robotics';
+import { getLessonFullDetail } from '@/services/robotics';
 
 // Import lesson section components
 import ObjectivesSection from '@/components/lesson/ObjectivesSection';
@@ -41,28 +40,17 @@ interface LessonData {
   id: number;
   slug: string;
   title: string;
-  subtitle: string;
-  objective: string;
-  knowledge_skills: string;
-  content_text: string;
   status: string;
   sort_order: number;
   subcourse: any;
   objectives: any[];
-  objectives_count: number;
   models: any[];
-  models_count: number;
   assembly_guides: any[];
-  assembly_guide_count: number;
   preparation: any;
   content_blocks: any[];
-  content_blocks_count: number;
   attachments: any[];
-  attachments_count: number;
   challenges: any[];
-  challenges_count: number;
   quizzes: any[];
-  quizzes_count: number;
   created_at: string;
 }
 
@@ -79,8 +67,6 @@ export default function LessonDetailPage() {
   const [activeSection, setActiveSection] = useState<string>('objectives');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
-  const [isMarkingComplete, setIsMarkingComplete] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -94,7 +80,6 @@ export default function LessonDetailPage() {
           return;
         }
 
-        // Lấy chi tiết lesson với FULL content
         const lessonData = await getLessonFullDetail(lessonSlug);
         setLesson(lessonData);
       } catch (err: any) {
@@ -147,16 +132,14 @@ export default function LessonDetailPage() {
   const sections = [
     {
       key: 'objectives',
-      label: 'Mục tiêu',
       icon: Target,
-      count: lesson.objectives_count,
+      label: 'Mục tiêu bài học',
       component: <ObjectivesSection objectives={lesson.objectives || []} />,
     },
     {
       key: 'models',
       label: 'Mô hình',
       icon: Box,
-      count: lesson.models_count,
       component: <ModelsSection models={lesson.models || []} />,
     },
     {
@@ -169,135 +152,85 @@ export default function LessonDetailPage() {
       key: 'assembly',
       label: 'Hướng dẫn lắp ráp',
       icon: Wrench,
-      count: lesson.assembly_guide_count,
       component: <AssemblyGuideSection assemblyGuides={lesson.assembly_guides || []} />,
     },
     {
       key: 'contents',
       label: 'Nội dung bài học',
       icon: BookOpen,
-      count: lesson.content_blocks_count,
       component: <LessonContentsSection contentBlocks={lesson.content_blocks || []} />,
     },
     {
       key: 'attachments',
       label: 'Tài liệu',
       icon: FileText,
-      count: lesson.attachments_count,
       component: <AttachmentsSection attachments={lesson.attachments || []} />,
     },
     {
       key: 'challenges',
       label: 'Thử thách',
       icon: Trophy,
-      count: lesson.challenges_count,
       component: <ChallengesSection challenges={lesson.challenges || []} />,
     },
     {
       key: 'quizzes',
       label: 'Quiz',
       icon: Brain,
-      count: lesson.quizzes_count,
       component: <QuizzesSection quizzes={lesson.quizzes || []} />,
     },
   ];
 
   const activeContent = sections.find((s) => s.key === activeSection);
 
-  const handleMarkComplete = async () => {
-    if (isMarkingComplete) return;
-    
-    console.log('Marking complete for lesson slug:', lessonSlug);
-    
-    try {
-      setIsMarkingComplete(true);
-      const result = await markLessonComplete(lessonSlug);
-      
-      console.log('Mark complete result:', result);
-      
-      if (result.success) {
-        setIsCompleted(true);
-        alert('✅ Đã đánh dấu hoàn thành bài học!');
-      } else {
-        const errorMsg = result.error || 'Có lỗi xảy ra. Vui lòng thử lại.';
-        alert('❌ ' + errorMsg);
-      }
-    } catch (err: any) {
-      console.error('Error marking complete:', err);
-      alert('❌ Có lỗi xảy ra. Vui lòng thử lại.');
-    } finally {
-      setIsMarkingComplete(false);
-    }
-  };
+  // Không có handler đánh dấu hoàn thành trên trang học sinh
 
   return (
-    <div className="fixed inset-0 bg-white flex flex-col pt-16">
-      {/* Top Header - Compact */}
-      <div className="bg-white border-b border-gray-200 shadow-sm fixed top-16 left-0 right-0 z-40">
-        <div className="px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
-          {/* Left: Back button + Sidebar toggle (mobile) */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="lg:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
-              aria-label="Toggle sidebar"
-            >
-              {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-            <button
-              onClick={() => router.push(`/programs/${programSlug}/subcourses/${subcourseSlug}`)}
-              className="group inline-flex items-center gap-2 px-3 py-2 rounded-lg text-brandPurple-600 transition-all hover:text-brandPurple-700 hover:bg-brandPurple-50"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">Quay lại khóa học</span>
-            </button>
-          </div>
-
-          {/* Center: Lesson title */}
-          <div className="flex-1 text-center px-4">
-            <h1 className="text-sm sm:text-lg font-bold text-gray-900 truncate">
-              {lesson.title}
-            </h1>
-            <p className="text-xs text-gray-500 hidden sm:block">
-              Bài {lesson.sort_order} - {lesson.subcourse?.title}
-            </p>
-          </div>
-
-          {/* Right: Mark complete button */}
-          <button
-            onClick={handleMarkComplete}
-            disabled={isCompleted || isMarkingComplete}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-              isCompleted
-                ? 'bg-green-100 text-green-700 cursor-not-allowed'
-                : isMarkingComplete
-                ? 'bg-gray-200 text-gray-500 cursor-wait'
-                : 'bg-green-600 text-white hover:bg-green-700 shadow-sm'
-            }`}
-          >
-            <CheckCircle className="w-4 h-4" />
-            <span className="hidden sm:inline">
-              {isMarkingComplete ? 'Đang lưu...' : isCompleted ? 'Đã hoàn thành' : 'Hoàn thành'}
-            </span>
-          </button>
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-white flex flex-col pt-16">
       {/* Main Layout: Sidebar + Content */}
-      <div className="flex flex-1 overflow-hidden pt-[60px]">
+      <div className="flex flex-1">
         {/* Sidebar Navigation */}
         <aside
           className={`${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-30 bg-white border-r border-gray-200 overflow-y-auto transition-all duration-300 ease-in-out ${
             isSidebarCollapsed ? 'lg:w-20' : 'lg:w-64'
-          } w-64`}
-          style={{ top: '124px' }}
+          } w-64 max-h-[calc(100vh-64px)]`}
+          style={{ top: '64px', bottom: '0' }}
         >
+          {/* Header Section in Sidebar */}
+          <div className="border-b border-gray-200 p-4 space-y-3">
+            {/* Back button + Sidebar toggle */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="lg:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
+                aria-label="Toggle sidebar"
+              >
+                {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+              <button
+                onClick={() => router.push(`/programs/${programSlug}/subcourses/${subcourseSlug}`)}
+                className="group flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-brandPurple-600 transition-all hover:text-brandPurple-700 hover:bg-brandPurple-50"
+              >
+                <ArrowLeft className="w-4 h-4 flex-shrink-0" />
+                <span className={isSidebarCollapsed ? 'hidden' : 'text-sm'}>Quay lại</span>
+              </button>
+            </div>
+
+            {/* Lesson title */}
+            {!isSidebarCollapsed && (
+              <div className="space-y-1">
+                <h2 className="text-sm font-bold text-gray-900 line-clamp-2">
+                  {lesson.title}
+                </h2>
+              </div>
+            )}
+          </div>
+
           {/* Collapse/Expand Button (Desktop only) */}
           <button
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className="hidden lg:flex absolute -right-0 bottom-4 z-40 items-center justify-center w-10 h-10 bg-white border border-gray-300 rounded-full shadow-sm hover:bg-gray-50 text-gray-600"
+            className="hidden lg:flex absolute -right-4 top-32 z-40 items-center justify-center w-10 h-10 bg-white border border-gray-300 rounded-full shadow-sm hover:bg-gray-50 text-gray-600 transition-all"
             aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {isSidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
@@ -326,16 +259,7 @@ export default function LessonDetailPage() {
                   title={isSidebarCollapsed ? section.label : undefined}
                 >
                   <Icon className="w-5 h-5 flex-shrink-0" />
-                  {!isSidebarCollapsed && (
-                    <>
-                      <span className="flex-1 font-medium text-sm">{section.label}</span>
-                    </>
-                  )}
-                  {isSidebarCollapsed && typeof section.count === 'number' && section.count > 0 && (
-                    <span className={`absolute top-1 right-1 w-2 h-2 rounded-full ${
-                      isActive ? 'bg-white' : 'bg-brandPurple-600'
-                    }`} />
-                  )}
+                  {!isSidebarCollapsed && <span className="flex-1 font-medium text-sm">{section.label}</span>}
                 </button>
               );
             })}
@@ -346,38 +270,15 @@ export default function LessonDetailPage() {
         {isSidebarOpen && (
           <div
             className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-20"
-            style={{ top: '124px' }}
+            style={{ top: '64px' }}
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
 
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto bg-gray-50">
-          <div className="max-w-8xl mx-auto p-4 sm:p-6 lg:p-8">
-            {/* Section Header */}
-            <div className="mb-6">
-              <div className="flex items-center gap-3 mb-2">
-                {activeContent && (
-                  <>
-                    <activeContent.icon className="w-6 h-6 text-brandPurple-600" />
-                    <h2 className="text-2xl font-bold text-gray-900">{activeContent.label}</h2>
-                    {typeof activeContent.count === 'number' && (
-                      <span className="px-3 py-1 rounded-full text-sm font-medium bg-brandPurple-100 text-brandPurple-700">
-                        {activeContent.count} mục
-                      </span>
-                    )}
-                  </>
-                )}
-              </div>
-              {lesson.subtitle && activeSection === 'objectives' && (
-                <p className="text-gray-600">{lesson.subtitle}</p>
-              )}
-            </div>
-
-            {/* Content */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              {activeContent?.component}
-            </div>
+          <div className="p-4 sm:p-6 max-w-7xl mx-auto">
+            {activeContent?.component}
           </div>
         </main>
       </div>
