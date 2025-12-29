@@ -192,35 +192,35 @@ export default function LessonDetailPage() {
         <aside
           className={`${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-30 bg-white border-r border-brandPurple-200 overflow-y-auto transition-all duration-300 ease-in-out ${
+          } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-30 bg-white border-r border-brandPurple-200 overflow-y-auto overflow-x-hidden transition-all duration-300 ease-in-out ${
             isSidebarCollapsed ? 'lg:w-20' : 'lg:w-64'
           } w-64 max-h-[calc(100vh-64px)]`}
           style={{ top: '64px', bottom: '0' }}
         >
           {/* Header Section in Sidebar */}
-          <div className="border-b border-brandPurple-200 p-4 space-y-3">
+          <div className="border-b border-brandPurple-200 p-4 space-y-3 min-w-0">
             {/* Back button + Sidebar toggle */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="lg:hidden p-2 rounded-lg text-brandPurple-600 hover:bg-brandPurple-50"
+                className="lg:hidden p-2 rounded-lg text-brandPurple-600 hover:bg-brandPurple-50 flex-shrink-0"
                 aria-label="Toggle sidebar"
               >
                 {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
               <button
                 onClick={() => router.push(`/programs/${programSlug}/subcourses/${subcourseSlug}`)}
-                className="group flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-brandPurple-600 transition-all hover:text-brandPurple-700 hover:bg-brandPurple-50"
+                className="group flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-brandPurple-600 transition-all hover:text-brandPurple-700 hover:bg-brandPurple-50 min-w-0"
               >
                 <ArrowLeft className="w-4 h-4 flex-shrink-0" />
-                <span className={isSidebarCollapsed ? 'hidden' : 'text-sm'}>Quay lại</span>
+                <span className={isSidebarCollapsed ? 'hidden' : 'text-sm truncate'}>Quay lại</span>
               </button>
             </div>
 
             {/* Lesson title */}
             {!isSidebarCollapsed && (
-              <div className="space-y-1">
-                <h2 className="text-sm font-bold text-gray-900 line-clamp-2">
+              <div className="space-y-1 min-w-0">
+                <h2 className="text-sm font-bold text-gray-900 line-clamp-2 break-words">
                   {lesson.title}
                 </h2>
               </div>
@@ -236,7 +236,7 @@ export default function LessonDetailPage() {
             {isSidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
           </button>
 
-          <nav className="p-4 space-y-1">
+          <nav className="p-4 space-y-1 min-w-0">
             {sections.map((section) => {
               const Icon = section.icon;
               const isActive = activeSection === section.key;
@@ -249,7 +249,7 @@ export default function LessonDetailPage() {
                       setIsSidebarOpen(false);
                     }
                   }}
-                  className={`w-full flex items-center gap-3 rounded-lg text-left transition-all ${
+                  className={`w-full flex items-center gap-3 rounded-lg text-left transition-all min-w-0 ${
                     isSidebarCollapsed ? 'px-2 py-3 justify-center' : 'px-4 py-3'
                   } ${
                     isActive
@@ -259,7 +259,7 @@ export default function LessonDetailPage() {
                   title={isSidebarCollapsed ? section.label : undefined}
                 >
                   <Icon className="w-5 h-5 flex-shrink-0" />
-                  {!isSidebarCollapsed && <span className="flex-1 font-medium text-sm">{section.label}</span>}
+                  {!isSidebarCollapsed && <span className="flex-1 font-medium text-sm truncate">{section.label}</span>}
                 </button>
               );
             })}

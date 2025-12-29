@@ -137,7 +137,7 @@ export default function ModelsSection({ models }: ModelsSectionProps) {
   if (!models || models.length === 0) return null;
 
   return (
-    <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+    <section className="bg-white rounded-xl shadow-sm border border-gray-200 p-10 mb-6">
       <div className="flex items-center gap-3 mb-6">
         <div className="p-2 bg-blue-100 rounded-lg">
           <Box className="w-6 h-6 text-blue-600" />
