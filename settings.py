@@ -164,15 +164,3 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': False,
     'UPDATE_LAST_LOGIN': True,
 }
-
-# Object Storage (S3-compatible) configuration
-if os.getenv('OBJECT_STORAGE_ENDPOINT'):
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    AWS_STORAGE_BUCKET_NAME = os.getenv('OBJECT_STORAGE_BUCKET')
-    AWS_S3_ENDPOINT_URL = os.getenv('OBJECT_STORAGE_ENDPOINT')
-    AWS_ACCESS_KEY_ID = os.getenv('OBJECT_STORAGE_ACCESS_KEY')
-    AWS_SECRET_ACCESS_KEY = os.getenv('OBJECT_STORAGE_SECRET_KEY')
-    AWS_S3_REGION_NAME = os.getenv('OBJECT_STORAGE_REGION', None)
-    AWS_S3_ADDRESSING_STYLE = 'virtual'
-    AWS_S3_SIGNATURE_VERSION = 's3v4'
-    AWS_DEFAULT_ACL = None  # Let bucket policy handle ACLs

@@ -71,7 +71,6 @@ export default function LoginPage() {
         router.refresh();
       } else {
         const errorData = await response.json();
-        console.log('Login error response:', errorData);
         setError(errorData.detail || 'Tên đăng nhập hoặc mật khẩu không đúng');
       }
     } catch (err) {

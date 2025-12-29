@@ -4,7 +4,6 @@ Serializers cho Classes App
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Class, ClassTeacher, ClassEnrollment
-from content.models import Subcourse
 
 
 class TeacherInfoSerializer(serializers.ModelSerializer):

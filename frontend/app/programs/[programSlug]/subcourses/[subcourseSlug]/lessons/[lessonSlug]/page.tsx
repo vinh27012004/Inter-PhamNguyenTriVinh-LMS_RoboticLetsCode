@@ -103,7 +103,7 @@ export default function LessonDetailPage() {
 
   if (loading) {
     return (
-    <div className="fixed inset-0 bg-gray-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-gradient-to-b from-brandPurple-50 to-white flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-brandPurple-600 mx-auto"></div>
         <p className="mt-4 text-gray-600">Đang tải bài học...</p>
@@ -114,7 +114,7 @@ export default function LessonDetailPage() {
 
   if (error || !lesson) {
     return (
-      <div className="fixed inset-0 bg-gray-50 flex items-center justify-center">
+      <div className="fixed inset-0 bg-gradient-to-b from-brandPurple-50 to-white flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">{error || 'Không tìm thấy dữ liệu'}</h2>
           <button
@@ -185,42 +185,42 @@ export default function LessonDetailPage() {
   // Không có handler đánh dấu hoàn thành trên trang học sinh
 
   return (
-    <div className="min-h-screen bg-white flex flex-col pt-16">
+    <div className="min-h-screen bg-gradient-to-b from-brandPurple-50 to-white flex flex-col pt-16">
       {/* Main Layout: Sidebar + Content */}
       <div className="flex flex-1">
         {/* Sidebar Navigation */}
         <aside
           className={`${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-30 bg-white border-r border-gray-200 overflow-y-auto transition-all duration-300 ease-in-out ${
+          } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-30 bg-white border-r border-brandPurple-200 overflow-y-auto overflow-x-hidden transition-all duration-300 ease-in-out ${
             isSidebarCollapsed ? 'lg:w-20' : 'lg:w-64'
           } w-64 max-h-[calc(100vh-64px)]`}
           style={{ top: '64px', bottom: '0' }}
         >
           {/* Header Section in Sidebar */}
-          <div className="border-b border-gray-200 p-4 space-y-3">
+          <div className="border-b border-brandPurple-200 p-4 space-y-3 min-w-0">
             {/* Back button + Sidebar toggle */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="lg:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
+                className="lg:hidden p-2 rounded-lg text-brandPurple-600 hover:bg-brandPurple-50 flex-shrink-0"
                 aria-label="Toggle sidebar"
               >
                 {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
               <button
                 onClick={() => router.push(`/programs/${programSlug}/subcourses/${subcourseSlug}`)}
-                className="group flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-brandPurple-600 transition-all hover:text-brandPurple-700 hover:bg-brandPurple-50"
+                className="group flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-brandPurple-600 transition-all hover:text-brandPurple-700 hover:bg-brandPurple-50 min-w-0"
               >
                 <ArrowLeft className="w-4 h-4 flex-shrink-0" />
-                <span className={isSidebarCollapsed ? 'hidden' : 'text-sm'}>Quay lại</span>
+                <span className={isSidebarCollapsed ? 'hidden' : 'text-sm truncate'}>Quay lại</span>
               </button>
             </div>
 
             {/* Lesson title */}
             {!isSidebarCollapsed && (
-              <div className="space-y-1">
-                <h2 className="text-sm font-bold text-gray-900 line-clamp-2">
+              <div className="space-y-1 min-w-0">
+                <h2 className="text-sm font-bold text-gray-900 line-clamp-2 break-words">
                   {lesson.title}
                 </h2>
               </div>
@@ -230,13 +230,13 @@ export default function LessonDetailPage() {
           {/* Collapse/Expand Button (Desktop only) */}
           <button
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className="hidden lg:flex absolute -right-4 top-32 z-40 items-center justify-center w-10 h-10 bg-white border border-gray-300 rounded-full shadow-sm hover:bg-gray-50 text-gray-600 transition-all"
+            className="hidden lg:flex absolute -right-4 top-32 z-40 items-center justify-center w-10 h-10 bg-white border border-brandPurple-200 rounded-full shadow-sm hover:bg-brandPurple-50 text-brandPurple-600 transition-all"
             aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {isSidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
           </button>
 
-          <nav className="p-4 space-y-1">
+          <nav className="p-4 space-y-1 min-w-0">
             {sections.map((section) => {
               const Icon = section.icon;
               const isActive = activeSection === section.key;
@@ -249,17 +249,17 @@ export default function LessonDetailPage() {
                       setIsSidebarOpen(false);
                     }
                   }}
-                  className={`w-full flex items-center gap-3 rounded-lg text-left transition-all ${
+                  className={`w-full flex items-center gap-3 rounded-lg text-left transition-all min-w-0 ${
                     isSidebarCollapsed ? 'px-2 py-3 justify-center' : 'px-4 py-3'
                   } ${
                     isActive
-                      ? 'bg-brandPurple-600 text-white shadow-sm'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-gradient-to-r from-brandPurple-600 to-brandPurple-400 text-white shadow-md'
+                      : 'text-gray-700 hover:bg-gradient-to-r hover:from-brandPurple-50 hover:to-brandYellow-100'
                   }`}
                   title={isSidebarCollapsed ? section.label : undefined}
                 >
                   <Icon className="w-5 h-5 flex-shrink-0" />
-                  {!isSidebarCollapsed && <span className="flex-1 font-medium text-sm">{section.label}</span>}
+                  {!isSidebarCollapsed && <span className="flex-1 font-medium text-sm truncate">{section.label}</span>}
                 </button>
               );
             })}
@@ -276,7 +276,7 @@ export default function LessonDetailPage() {
         )}
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto bg-gray-50">
+        <main className="flex-1 overflow-y-auto bg-gradient-to-b from-white to-brandPurple-50/30">
           <div className="p-4 sm:p-6 max-w-7xl mx-auto">
             {activeContent?.component}
           </div>

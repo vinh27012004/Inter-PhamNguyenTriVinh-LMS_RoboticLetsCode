@@ -120,12 +120,8 @@ export const getLessonFullDetail = async (slug) => {
  */
 export const markLessonComplete = async (lessonSlug) => {
   try {
-    console.log('Calling markLessonComplete with slug:', lessonSlug);
     const url = `/content/lessons/${lessonSlug}/mark_complete/`;
-    console.log('POST URL:', url);
-    
     const response = await axiosInstance.post(url);
-    console.log('Response:', response);
     
     return {
       success: true,

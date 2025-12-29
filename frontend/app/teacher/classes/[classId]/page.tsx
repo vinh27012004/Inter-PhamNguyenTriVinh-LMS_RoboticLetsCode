@@ -106,20 +106,20 @@ export default function ClassDetailPage() {
   };
 
   const getProgressColor = (percentage: number) => {
-    if (percentage >= 80) return 'text-green-600';
-    if (percentage >= 50) return 'text-yellow-600';
+    if (percentage >= 80) return 'text-brandPurple-600';
+    if (percentage >= 50) return 'text-brandYellow-500';
     return 'text-red-600';
   };
 
   const getProgressBarColor = (percentage: number) => {
-    if (percentage >= 80) return 'bg-green-500';
-    if (percentage >= 50) return 'bg-yellow-500';
+    if (percentage >= 80) return 'bg-gradient-to-r from-brandPurple-600 to-brandPurple-400';
+    if (percentage >= 50) return 'bg-gradient-to-r from-brandYellow-500 to-brandYellow-300';
     return 'bg-red-500';
   };
 
   const getProgressBgColor = (percentage: number) => {
-    if (percentage >= 80) return 'bg-green-100';
-    if (percentage >= 50) return 'bg-yellow-100';
+    if (percentage >= 80) return 'bg-brandPurple-50';
+    if (percentage >= 50) return 'bg-brandYellow-100';
     return 'bg-red-100';
   };
 
@@ -132,7 +132,7 @@ export default function ClassDetailPage() {
 
   if (loading && !classDetail) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 pt-20">
+      <div className="min-h-screen bg-gradient-to-b from-brandPurple-50 to-white pt-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse space-y-6">
             <div className="h-10 bg-gray-300 rounded w-1/4"></div>
@@ -145,7 +145,7 @@ export default function ClassDetailPage() {
 
   if (error && !classDetail) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 pt-20">
+      <div className="min-h-screen bg-gradient-to-b from-brandPurple-50 to-white pt-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <button
             onClick={() => router.push('/teacher')}
@@ -163,7 +163,7 @@ export default function ClassDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 pt-20 pb-12">
+    <div className="min-h-screen bg-gradient-to-b from-brandPurple-50 to-white pt-20 pb-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <button
@@ -186,7 +186,7 @@ export default function ClassDetailPage() {
                 <span
                   className={`px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 ${
                     classDetail.status === 'ACTIVE'
-                      ? 'bg-green-100 text-green-800'
+                      ? 'bg-brandYellow-100 text-yellow-800'
                       : 'bg-gray-100 text-gray-800'
                   }`}
                 >
@@ -195,14 +195,14 @@ export default function ClassDetailPage() {
                 </span>
               </div>
 
-              <div className="flex items-center gap-2 mb-6 pb-6 border-b border-gray-200">
+              <div className="flex items-center gap-2 mb-6 pb-6 border-b border-brandPurple-200">
                 <BookOpen className="w-5 h-5 text-brandPurple-600" />
                 <p className="text-lg font-semibold text-gray-900">{classDetail.subcourse_title}</p>
               </div>
 
               {/* Stats Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4">
+                <div className="bg-gradient-to-br from-brandPurple-50 to-brandPurple-100 rounded-lg p-4">
                   <p className="text-sm text-gray-600 mb-2 flex items-center gap-2">
                     <Users className="w-4 h-4" />
                     Tổng học viên
@@ -213,7 +213,7 @@ export default function ClassDetailPage() {
                   <p className="text-xs text-gray-600 mt-1">/ {classDetail.max_students}</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-brandPurple-50 to-brandPurple-100 rounded-lg p-4">
+                <div className="bg-gradient-to-br from-brandPurple-50 to-brandYellow-100 rounded-lg p-4">
                   <p className="text-sm text-gray-600 mb-2 flex items-center gap-2">
                     <TrendingUp className="w-4 h-4" />
                     Tiến độ trung bình
@@ -221,7 +221,7 @@ export default function ClassDetailPage() {
                   <p className="text-3xl font-bold text-gray-900">{avgCompletion}%</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4">
+                <div className="bg-gradient-to-br from-brandYellow-100 to-brandYellow-50 rounded-lg p-4">
                   <p className="text-sm text-gray-600 mb-2 flex items-center gap-2">
                     <CheckCircle className="w-4 h-4" />
                     Hoàn thành
@@ -231,7 +231,7 @@ export default function ClassDetailPage() {
                   </p>
                 </div>
 
-                <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-4">
+                <div className="bg-gradient-to-br from-brandPurple-200 to-brandPurple-50 rounded-lg p-4">
                   <p className="text-sm text-gray-600 mb-2 flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
                     Khai giảng
@@ -245,7 +245,7 @@ export default function ClassDetailPage() {
 
             {/* Tabs */}
             <div className="bg-white rounded-xl shadow-sm mb-8">
-              <div className="border-b border-gray-200">
+              <div className="border-b border-brandPurple-200">
                 <nav className="flex">
                   <button
                     onClick={() => setActiveTab('overview')}
@@ -299,7 +299,7 @@ export default function ClassDetailPage() {
                       </div>
                     </div>
 
-                    <div className="pt-6 border-t border-gray-200">
+                    <div className="pt-6 border-t border-brandPurple-200">
                       <h3 className="text-lg font-semibold text-gray-900 mb-4">
                         Tình hình lớp học
                       </h3>
@@ -336,7 +336,7 @@ export default function ClassDetailPage() {
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-3">
                             <div
-                              className="bg-green-500 h-3 rounded-full transition-all"
+                              className="bg-gradient-to-r from-brandPurple-600 to-brandPurple-400 h-3 rounded-full transition-all"
                               style={{
                                 width: `${students.length > 0 ? avgCompletion : 0}%`,
                               }}
@@ -359,12 +359,12 @@ export default function ClassDetailPage() {
                       <div className="space-y-4">
                         {/* Lesson selector (shared) */}
                         {classDetail?.subcourse && lessons.length === 0 && (
-                          <div className="p-4 rounded-lg border border-gray-200 bg-gray-50">
+                          <div className="p-4 rounded-lg border border-brandPurple-200 bg-brandPurple-50">
                             <p className="text-sm text-gray-700">Đang tải danh sách bài học...</p>
                           </div>
                         )}
                         {classDetail?.subcourse && lessons.length > 0 && (
-                          <div className="p-4 rounded-lg border border-gray-200 bg-gray-50">
+                          <div className="p-4 rounded-lg border border-brandPurple-200 bg-brandPurple-50">
                             <p className="text-sm text-gray-700 mb-2">
                               Chọn bài học để đánh dấu hoàn thành cho từng học viên
                             </p>
@@ -373,7 +373,7 @@ export default function ClassDetailPage() {
                         {students.map((student) => (
                           <div
                             key={student.student_id}
-                            className={`p-4 rounded-lg border border-gray-200 ${getProgressBgColor(student.completion_percentage)} hover:shadow-md transition-shadow`}
+                            className={`p-4 rounded-lg border border-brandPurple-200 ${getProgressBgColor(student.completion_percentage)} hover:shadow-md transition-shadow`}
                           >
                             <div className="flex items-start justify-between mb-3">
                               <div>
@@ -419,7 +419,7 @@ export default function ClassDetailPage() {
                             </div>
 
                             {student.last_lesson && (
-                              <div className="mt-2 pt-2 border-t border-gray-300">
+                              <div className="mt-2 pt-2 border-t border-brandPurple-200">
                                 <p className="text-xs text-gray-600">
                                   Bài cuối cùng: <span className="font-medium">{student.last_lesson}</span>
                                 </p>
@@ -428,10 +428,10 @@ export default function ClassDetailPage() {
 
                             {/* Teacher action: mark lesson complete for this student */}
                             {lessons.length > 0 && (
-                              <div className="mt-4 pt-3 border-t border-gray-200">
+                              <div className="mt-4 pt-3 border-t border-brandPurple-200">
                                 <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
                                   <select
-                                    className="w-full sm:w-auto  px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white text-gray-900 font-medium"
+                                    className="w-full sm:w-auto  px-3 py-2 border border-brandPurple-200 rounded-lg text-sm bg-white text-gray-900 font-medium focus:border-brandPurple-400 focus:ring-2 focus:ring-brandPurple-200"
                                     value={selectedLessons[student.student_id] || ''}
                                     onChange={(e) =>
                                       setSelectedLessons((prev) => ({
@@ -447,7 +447,7 @@ export default function ClassDetailPage() {
                                         <option 
                                           key={lesson.id} 
                                           value={lesson.slug} 
-                                          className={`${isCompleted ? 'text-green-700 font-semibold' : 'text-gray-900'} bg-white`}
+                                          className={`${isCompleted ? 'text-brandPurple-600 font-semibold' : 'text-gray-900'} bg-white`}
                                         >
                                           {isCompleted ? '✓ ' : ''}
                                           {lesson.sort_order ? `${lesson.sort_order}. ` : ''}
@@ -457,10 +457,10 @@ export default function ClassDetailPage() {
                                     })}
                                   </select>
                                   <button
-                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                                       markingState[student.student_id]
                                         ? 'bg-gray-200 text-gray-600 cursor-wait'
-                                        : 'bg-green-600 text-white hover:bg-green-700'
+                                        : 'bg-gradient-to-r from-brandPurple-600 to-brandPurple-600 text-white'
                                     }`}
                                     disabled={
                                       markingState[student.student_id] || !selectedLessons[student.student_id]

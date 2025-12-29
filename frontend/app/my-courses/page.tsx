@@ -34,16 +34,12 @@ export default function MyCoursesPage() {
     try {
       // Kiểm tra authentication
       const token = localStorage.getItem('access_token');
-      console.log('Token:', token ? 'EXISTS' : 'NOT FOUND');
       if (!token) {
-        console.log('No token, redirecting to login');
         router.push('/login');
         return;
       }
 
-      console.log('Fetching /auth/assignments/...');
       const response = await axios.get('/auth/assignments/');
-      console.log('Raw API response:', response.data);
       
       // Get results from paginated response
       const assignmentsData = response.data.results || response.data;
@@ -53,7 +49,6 @@ export default function MyCoursesPage() {
         ? assignmentsData.filter((a: any) => a.status === 'ACTIVE')
         : [];
       
-      console.log('Active assignments with full data:', activeAssignments);
       
       // API đã trả về đủ thông tin và user đã có assignment = đã có quyền
       setAssignments(activeAssignments);
@@ -61,7 +56,6 @@ export default function MyCoursesPage() {
     } catch (err: any) {
       console.error('Fetch error:', err);
       if (err.response?.status === 401) {
-        console.log('Unauthorized, redirecting to login');
         router.push('/login');
       } else {
         setError('Không thể tải danh sách khóa học');

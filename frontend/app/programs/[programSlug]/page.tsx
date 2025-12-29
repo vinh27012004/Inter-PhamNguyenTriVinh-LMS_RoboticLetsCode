@@ -64,8 +64,6 @@ export default function ProgramDetailPage() {
 
         // Lấy thông tin program
         const programData = await getProgramDetail(programSlug);
-        console.log('Program data:', programData);
-        console.log('Thumbnail URL:', programData.thumbnail_url);
         setProgram(programData);
 
         // Kiểm tra authentication
@@ -180,13 +178,13 @@ export default function ProgramDetailPage() {
   const kitConfig = {
     SPIKE_ESSENTIAL: {
       label: 'SPIKE Essential',
-      bgColor: 'bg-yellow-100',
+      bgColor: 'bg-brandYellow-100',
       textColor: 'text-yellow-800',
     },
     SPIKE_PRIME: {
       label: 'SPIKE Prime',
-      bgColor: 'bg-purple-100',
-      textColor: 'text-purple-800',
+      bgColor: 'bg-brandPurple-200',
+      textColor: 'text-brandPurple-600',
     },
   };
 
@@ -228,16 +226,15 @@ export default function ProgramDetailPage() {
                     alt={program.title}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      console.error('Image failed to load:', program.thumbnail_url);
                       e.currentTarget.style.display = 'none';
-                      e.currentTarget.parentElement!.innerHTML = '<div class="w-full h-full bg-gradient-to-br from-purple-100 to-yellow-100 flex items-center justify-center"><svg class="w-20 h-20 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg></div>';
+                      e.currentTarget.parentElement!.innerHTML = '<div class="w-full h-full bg-gradient-to-br from-brandPurple-200 to-brandYellow-100 flex items-center justify-center"><svg class="w-20 h-20 text-brandPurple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg></div>';
                     }}
                   />
                 </div>
               ) : (
                 // Placeholder nếu không có ảnh
-                <div className="relative w-full aspect-video bg-gradient-to-br from-brandPurple-100 to-brandYellow-100 flex items-center justify-center">
-                  <BookOpen className="w-20 h-20 text-brandPurple-300" />
+                <div className="relative w-full aspect-video bg-gradient-to-br from-brandPurple-200 to-brandYellow-100 flex items-center justify-center">
+                  <BookOpen className="w-20 h-20 text-brandPurple-400" />
                 </div>
               )}
 
@@ -247,9 +244,9 @@ export default function ProgramDetailPage() {
                 
                 {/* Badge ADMIN */}
                 {isAdmin && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-sm font-semibold text-red-800">🔑 Chế độ quản trị viên</p>
-                    <p className="text-xs text-red-700 mt-1">Bạn có thể xem tất cả khóa học</p>
+                  <div className="mb-4 p-3 bg-gradient-to-r from-brandPurple-100 to-brandYellow-50 border border-brandPurple-300 rounded-lg">
+                    <p className="text-sm font-semibold text-brandPurple-600">🔑 Chế độ quản trị viên</p>
+                    <p className="text-xs text-brandPurple-600/80 mt-1">Bạn có thể xem tất cả khóa học</p>
                   </div>
                 )}
 

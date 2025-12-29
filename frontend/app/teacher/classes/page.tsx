@@ -47,9 +47,9 @@ export default function TeacherClassesPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ACTIVE':
-        return 'bg-green-100 text-green-800';
+        return 'bg-brandYellow-100 text-yellow-800';
       case 'UPCOMING':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-brandPurple-200 text-brandPurple-600';
       case 'COMPLETED':
         return 'bg-gray-100 text-gray-800';
       case 'CANCELLED':
@@ -61,7 +61,7 @@ export default function TeacherClassesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-gradient-to-b from-brandPurple-50 to-white p-6">
         <div className="max-w-7xl mx-auto">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-300 rounded w-1/4 mb-6"></div>
@@ -78,7 +78,7 @@ export default function TeacherClassesPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-gradient-to-b from-brandPurple-50 to-white p-6">
         <div className="max-w-7xl mx-auto">
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
             {error}
@@ -89,7 +89,7 @@ export default function TeacherClassesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gradient-to-b from-brandPurple-50 to-white p-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Lớp học của tôi</h1>
@@ -139,7 +139,7 @@ export default function TeacherClassesPage() {
                       <span>
                         {classItem.current_enrollment_count}/{classItem.max_students} học viên
                         {classItem.is_full && (
-                          <span className="ml-2 text-orange-600 font-medium">(Đầy)</span>
+                          <span className="ml-2 text-brandPurple-600 font-medium">(Đầy)</span>
                         )}
                       </span>
                     </div>
@@ -154,13 +154,13 @@ export default function TeacherClassesPage() {
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="mt-4 pt-4 border-t border-brandPurple-200">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         router.push(`/teacher/classes/${classItem.id}`);
                       }}
-                      className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                      className="w-full flex items-center justify-center px-4 py-2 bg-gradient-to-r from-brandPurple-600 to-brandPurple-500 text-white rounded-lg hover:bg-brandPurple-700 hover:shadow-md transition-all text-sm font-medium"
                     >
                       <TrendingUp className="w-4 h-4 mr-2" />
                       Xem chi tiết

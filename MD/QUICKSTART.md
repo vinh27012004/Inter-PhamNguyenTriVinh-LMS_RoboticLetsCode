@@ -1,122 +1,85 @@
-# 🚀 QUICK START - 5 PHÚT ĐỂ CHẠY ADMIN PANEL
+# 🚀 QUICK START - E-Robotic Let's Code
 
-## Bước 1: Cài đặt (30 giây)
+Hướng dẫn setup và chạy dự án trong 5 phút.
+
+## 📋 Yêu cầu
+
+- Python 3.8+
+- MySQL 5.7+
+- Node.js 18+ (cho frontend)
+
+## ⚡ Các bước nhanh
+
+### 1. Cài đặt Dependencies
+
 ```powershell
-cd "d:\CODE\ThucTapDoanhNghiep\E-RoboticLet'sCode"
+# Backend
 pip install -r requirements.txt
+
+# Frontend
+cd frontend
+npm install
 ```
 
-## Bước 2: Cấu hình Database (1 phút)
-```powershell
-# Tạo database trong MySQL
-mysql -u root -p
-```
+### 2. Cấu hình Database
+
+Tạo database trong MySQL:
 ```sql
 CREATE DATABASE IF NOT EXISTS LetCodeEdu;
-EXIT;
 ```
 
-## Bước 3: Migrations (1 phút)
+Cấu hình trong `settings.py`:
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'custom_db',
+        'NAME': 'LetCodeEdu',
+        'USER': 'root',
+        'PASSWORD': 'your_password',
+        'HOST': 'localhost',
+        'PORT': '3306',
+    }
+}
+```
+
+### 3. Migrations
+
 ```powershell
-python manage.py makemigrations content
-python manage.py makemigrations user_auth
+python manage.py makemigrations
 python manage.py migrate
 ```
 
-## Bước 4: Tạo Superuser (1 phút)
+### 4. Tạo Superuser
+
 ```powershell
 python manage.py createsuperuser
-# Username: admin
-# Email: admin@example.com
-# Password: (nhập password của bạn)
 ```
 
-## Bước 5: Chạy Server (10 giây)
+### 5. Chạy Server
+
 ```powershell
+# Backend
 python manage.py runserver
+
+# Frontend (terminal khác)
+cd frontend
+npm run dev
 ```
 
-## Bước 6: Truy cập Admin (10 giây)
-Mở trình duyệt: **http://127.0.0.1:8000/admin/**
+### 6. Truy cập
 
-Login bằng tài khoản superuser vừa tạo.
+- **Admin Panel**: http://127.0.0.1:8000/admin/
+- **API**: http://127.0.0.1:8000/api/
+- **Frontend**: http://localhost:3000
 
----
+## 🎯 Test nhanh
 
-## 🎯 Test ngay tính năng
+1. Đăng nhập Admin Panel
+2. Tạo Program → Subcourse → Lesson
+3. Kiểm tra API tại `/api/content/programs/`
 
-### 1. Tạo Chương trình học đầu tiên
-- Click **"Programs"** → **"Add Program"**
-- Điền:
-  - Title: `SPIKE Essential Cơ bản`
-  - Kit type: `SPIKE_ESSENTIAL`
-  - Status: `Published`
-- Scroll xuống → Thêm Subcourse inline:
-  - Title: `Module 1: Làm quen`
-  - Coding language: `ICON_BLOCKS`
-- **Save** → ✅ Xong!
+## 📚 Tài liệu chi tiết
 
-### 2. Thêm Bài học
-- Click vào **Subcourse** vừa tạo
-- Scroll xuống → Thêm Lesson inline:
-  - Title: `Bài 1: Hello Robot`
-  - Estimated duration: `30`
-- **Save** → ✅ Xong!
-
-### 3. Gán quyền cho User
-- Click **"Users"** → Chọn user
-- Scroll xuống → **"Auth assignments"** inline
-- Thêm:
-  - Program: Chọn program vừa tạo
-  - Status: `ACTIVE`
-- **Save** → ✅ Xong!
-
----
-
-## 📚 Files quan trọng
-
-| File | Mô tả |
-|------|-------|
-| `README_ADMIN.md` | 📖 Tài liệu đầy đủ về Admin Panel |
-| `SETUP_GUIDE.md` | 🔧 Hướng dẫn setup chi tiết |
-| `CODE_SUMMARY.md` | 📊 Tóm tắt code & architecture |
-| `ADMIN_DEMO_GUIDE.py` | 💡 Demo cách sử dụng từng tính năng |
-| `TEST_CHECKLIST.py` | ✅ Checklist để test |
-| `requirements.txt` | 📦 Dependencies cần cài |
-
----
-
-## ❓ Troubleshooting nhanh
-
-### Lỗi: "ModuleNotFoundError: No module named 'django'"
-```powershell
-pip install django mysqlclient djangorestframework django-cors-headers
-```
-
-### Lỗi: "django.db.utils.OperationalError: (2003, "Can't connect")"
-- Kiểm tra MySQL đã chạy chưa
-- Kiểm tra username/password trong `setting.py`
-
-### Lỗi: "Unknown database 'LetCodeEdu'"
-```sql
-CREATE DATABASE LetCodeEdu;
-```
-
-### Lỗi: "No such table: content_program"
-```powershell
-python manage.py migrate
-```
-
----
-
-## 🎉 Chúc mừng!
-
-Bạn đã có một Admin Panel chuyên nghiệp với:
-- ✅ Cấu trúc 3 tầng: Program → Subcourse → Lesson
-- ✅ RBAC đầy đủ: User → Profile → Assignment
-- ✅ Inline editing tiện lợi
-- ✅ Color badges đẹp mắt
-- ✅ Smart links navigation
-- ✅ Batch operations
-
-**Next step:** Viết REST API với Django REST Framework! 🚀
+- [README.md](./README.md) - Tổng quan dự án
+- [README_ADMIN.md](./README_ADMIN.md) - Hướng dẫn Admin Panel
+- [API_REFERENCE.md](./API_REFERENCE.md) - Tài liệu API
