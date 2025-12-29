@@ -74,7 +74,6 @@ export default function SubcourseDetailPage() {
 
         // Kiểm tra authentication
         const token = localStorage.getItem("access_token");
-        console.log("Token:", token ? "EXISTS" : "NOT FOUND");
         if (!token) {
           router.push("/login");
           return;
@@ -84,27 +83,22 @@ export default function SubcourseDetailPage() {
         const { getSubcourses, getLessonDetail } = await import(
           "@/services/robotics"
         );
-        console.log("Fetching subcourse with slug:", subcourseSlug);
         const subcoursesData = await getSubcourses({ slug: subcourseSlug });
-        console.log("Subcourses data:", subcoursesData);
 
         if (subcoursesData.results && subcoursesData.results.length > 0) {
           const selectedSubcourse = subcoursesData.results[0];
-          console.log("Selected subcourse:", selectedSubcourse);
 
           // Fetch ALL lessons for this subcourse with large page_size
           const lessonsData = await getLessons({
             subcourse: selectedSubcourse.id,
             page_size: 100, // Load up to 100 lessons
           });
-          console.log("Lessons data:", lessonsData);
 
           // Fetch detailed info for each lesson
           const lessonsWithDetails = await Promise.all(
             (lessonsData.results || []).map(async (lesson: any) => {
               try {
                 const detailData = await getLessonDetail(lesson.slug);
-                console.log(`Lesson detail ${lesson.slug}:`, detailData);
                 return detailData;
               } catch (err) {
                 console.error(`Error fetching lesson ${lesson.slug}:`, err);
@@ -113,7 +107,6 @@ export default function SubcourseDetailPage() {
             })
           );
 
-          console.log("Lessons with details:", lessonsWithDetails);
 
           // Add lessons to subcourse object
           selectedSubcourse.lessons = lessonsWithDetails;
@@ -179,14 +172,14 @@ export default function SubcourseDetailPage() {
   const languageConfig: Record<string, any> = {
     WORD_BLOCKS: {
       label: "Word Blocks",
-      bgColor: "bg-blue-100",
-      textColor: "text-blue-800",
+      bgColor: "bg-brandPurple-200",
+      textColor: "text-brandPurple-600",
       icon: Code,
     },
     PYTHON: {
       label: "Python",
-      bgColor: "bg-green-100",
-      textColor: "text-green-800",
+      bgColor: "bg-brandYellow-100",
+      textColor: "text-yellow-800",
       icon: Code,
     },
   };
@@ -195,8 +188,8 @@ export default function SubcourseDetailPage() {
     return (
       languageConfig[lang] || {
         label: "Unknown",
-        bgColor: "bg-gray-100",
-        textColor: "text-gray-800",
+        bgColor: "bg-brandPurple-200",
+        textColor: "text-brandPurple-600",
         icon: Code,
       }
     );
@@ -227,7 +220,7 @@ export default function SubcourseDetailPage() {
               <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                 {/* Thumbnail */}
                 {subcourse.thumbnail_url ? (
-                  <div className="relative w-full aspect-video bg-gray-100">
+                  <div className="relative w-full aspect-video bg-brandPurple-50">
                     <Image
                       src={subcourse.thumbnail_url}
                       alt={subcourse.title}
@@ -237,8 +230,8 @@ export default function SubcourseDetailPage() {
                     />
                   </div>
                 ) : (
-                  <div className="relative w-full aspect-video bg-gradient-to-br from-brandPurple-100 to-brandYellow-100 flex items-center justify-center">
-                    <BookOpen className="w-20 h-20 text-brandPurple-300" />
+                  <div className="relative w-full aspect-video bg-gradient-to-br from-brandPurple-200 to-brandYellow-100 flex items-center justify-center">
+                    <BookOpen className="w-20 h-20 text-brandPurple-400" />
                   </div>
                 )}
                 <div className="p-6">
@@ -247,15 +240,15 @@ export default function SubcourseDetailPage() {
                     <span
                       className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                         subcourse.level === "BEGINNER"
-                          ? "bg-green-100 text-green-800"
+                          ? "bg-brandYellow-100 text-yellow-800"
                           : subcourse.level === "INTERMEDIATE"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-red-100 text-red-800"
+                          ? "bg-brandPurple-200 text-brandPurple-600"
+                          : "bg-brandPurple-400 text-white"
                       }`}
                     >
                       {subcourse.level_display}
                     </span>
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-brandPurple-200 text-brandPurple-600">
                       Level {subcourse.level_number}
                     </span>
                   </div>
@@ -282,7 +275,7 @@ export default function SubcourseDetailPage() {
 
                   {/* Objectives */}
                   {subcourse.objective && (
-                    <div className="mb-6 bg-gradient-to-br from-brandPurple-50 to-brandYellow-50 rounded-xl p-5 border border-brandPurple-100">
+                    <div className="mb-6 bg-gradient-to-br from-brandPurple-50 to-brandYellow-100 rounded-xl p-5 border border-brandPurple-200">
                       <div className="flex items-center mb-4">
                         <Target className="w-5 h-5 text-brandPurple-600 mr-2" />
                         <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
@@ -335,14 +328,14 @@ export default function SubcourseDetailPage() {
                     className={`bg-white rounded-2xl shadow-lg overflow-hidden border-2 transition-all duration-300 ${
                       expandedLesson === lesson.id
                         ? "border-brandPurple-400 shadow-2xl"
-                        : "border-gray-100 hover:border-brandPurple-200 hover:shadow-xl"
+                        : "border-brandPurple-100 hover:border-brandPurple-300 hover:shadow-xl"
                     }`}
                   >
                     <div
                       className={`p-6 cursor-pointer transition-all duration-300 ${
                         expandedLesson === lesson.id
-                          ? "bg-gradient-to-r from-brandPurple-50 to-brandYellow-50"
-                          : "hover:bg-gradient-to-r hover:from-brandPurple-50/40 hover:to-brandYellow-50/40"
+                          ? "bg-gradient-to-r from-brandPurple-50 to-brandYellow-100"
+                          : "hover:bg-gradient-to-r hover:from-brandPurple-50/50 hover:to-brandYellow-100/50"
                       }`}
                       onClick={() =>
                         setExpandedLesson(
@@ -354,7 +347,7 @@ export default function SubcourseDetailPage() {
                         <div className="flex items-center space-x-4 flex-1">
                           <div className="relative">
                             <div className="absolute inset-0 bg-gradient-to-br from-brandPurple-500 to-brandPurple-600 rounded-full blur-md opacity-50"></div>
-                            <div className="relative flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-brandPurple-500 to-brandPurple-600 text-brandPurple-300 flex items-center justify-center font-bold text-xl shadow-lg">
+                            <div className="relative flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-brandPurple-600 to-brandPurple-400 text-white flex items-center justify-center font-bold text-xl shadow-lg">
                               {lesson.sort_order}
                             </div>
                           </div>
@@ -373,7 +366,7 @@ export default function SubcourseDetailPage() {
                           className={`flex-shrink-0 ml-4 p-2 rounded-full transition-all duration-300 ${
                             expandedLesson === lesson.id
                               ? "bg-brandPurple-100"
-                              : "bg-gray-100 group-hover:bg-brandPurple-50"
+                              : "bg-brandPurple-50 group-hover:bg-brandPurple-100"
                           }`}
                         >
                           <ArrowLeft
@@ -389,12 +382,12 @@ export default function SubcourseDetailPage() {
 
                     {/* Expandable content */}
                     {expandedLesson === lesson.id && (
-                      <div className="px-6 pb-6 space-y-4 bg-gradient-to-b from-gray-50/50 to-white pt-6">
+                      <div className="px-6 pb-6 space-y-4 bg-gradient-to-b from-brandPurple-50/30 to-white pt-6">
                         <LessonInfoCard
                           title="Mục tiêu bài học"
                           content={lesson.objective}
                           icon="🎯"
-                          bgGradient="from-brandPurple-50 to-brandYellow-50"
+                          bgGradient="from-brandPurple-50 to-brandYellow-100"
                           borderColor="border-brandPurple-200"
                         />
 
@@ -402,7 +395,7 @@ export default function SubcourseDetailPage() {
                           title="Kiến thức & Kỹ năng"
                           content={lesson.knowledge_skills}
                           icon="💡"
-                          bgGradient="from-brandYellow-50 to-brandPurple-50"
+                          bgGradient="from-brandYellow-100 to-brandPurple-50"
                           borderColor="border-brandYellow-200"
                         />
 
@@ -410,7 +403,7 @@ export default function SubcourseDetailPage() {
                           title="Nội dung bài học"
                           content={lesson.content_text}
                           icon="📚"
-                          bgGradient="from-brandPurple-50 to-brandYellow-50"
+                          bgGradient="from-brandPurple-50 to-brandYellow-100"
                           borderColor="border-brandPurple-200"
                         />
 

@@ -506,7 +506,6 @@ class ChallengeSerializer(serializers.ModelSerializer):
             'lesson',
             'title',
             'subtitle',
-            'description',
             'instructions',
             'expected_output',
             'difficulty',

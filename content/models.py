@@ -820,10 +820,6 @@ class Challenge(models.Model):
         blank=True,
         verbose_name='Tiêu đề phụ'
     )
-    description = models.TextField(
-        verbose_name='Mô tả chi tiết',
-        help_text='Mô tả bài tập/thử thách'
-    )
     instructions = models.TextField(
         verbose_name='Hướng dẫn',
         help_text='Các bước thực hiện chi tiết'

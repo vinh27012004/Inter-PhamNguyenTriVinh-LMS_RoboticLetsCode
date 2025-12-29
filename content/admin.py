@@ -1016,7 +1016,6 @@ class ChallengeAdmin(admin.ModelAdmin):
     search_fields = [
         'title',
         'subtitle',
-        'description',
         'lesson__title',
     ]
     
@@ -1030,7 +1029,7 @@ class ChallengeAdmin(admin.ModelAdmin):
             'fields': ('title', 'subtitle', 'difficulty', 'points', 'time_limit_minutes', 'status', 'order')
         }),
         ('Nội dung', {
-            'fields': ('description', 'instructions', 'expected_output', 'media'),
+            'fields': ('instructions', 'expected_output', 'media'),
             'classes': ('wide',),
         }),
     )

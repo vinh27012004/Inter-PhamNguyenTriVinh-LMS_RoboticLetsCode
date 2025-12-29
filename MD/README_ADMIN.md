@@ -225,7 +225,7 @@ Cấu hình `MEDIA_ROOT` và `MEDIA_URL` trong settings.
 3. ✅ Test Admin Panel
 4. 🔲 Viết API endpoints với Django REST Framework
 5. 🔲 Tích hợp với Frontend (Next.js)
-6. 🔲 Cấu hình Object Storage (AWS S3/Google Cloud Storage)
+6. ✅ Hoàn thành setup
 7. 🔲 Viết unit tests
 
 ## ⚠️ Lưu ý quan trọng

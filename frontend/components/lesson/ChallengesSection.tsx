@@ -19,7 +19,6 @@ interface Challenge {
   id: number;
   title: string;
   subtitle: string;
-  description: string;
   instructions: string;
   expected_output: string;
   difficulty: string;
@@ -81,11 +80,6 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
 
       {/* Content */}
       <div className="p-5 space-y-4">
-        {/* Description */}
-        <div>
-          <p className="text-gray-700 leading-relaxed">{challenge.description}</p>
-        </div>
-
         {/* Toggle Details */}
         <button
           onClick={() => setIsExpanded(!isExpanded)}

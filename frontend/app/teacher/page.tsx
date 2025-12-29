@@ -85,9 +85,9 @@ export default function TeacherDashboard() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ACTIVE':
-        return 'bg-green-100 text-green-800';
+        return 'bg-brandYellow-100 text-yellow-800';
       case 'UPCOMING':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-brandPurple-200 text-brandPurple-600';
       case 'COMPLETED':
         return 'bg-gray-100 text-gray-800';
       case 'CANCELLED':
@@ -110,7 +110,7 @@ export default function TeacherDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-b from-brandPurple-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="animate-pulse">
             <div className="h-12 bg-gray-300 rounded w-1/3 mb-8"></div>
@@ -131,7 +131,7 @@ export default function TeacherDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 pt-16">
+    <div className="min-h-screen bg-gradient-to-b from-brandPurple-50 to-white pt-16">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -160,43 +160,43 @@ export default function TeacherDashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
+          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-brandPurple-600">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Tổng lớp học</p>
                 <p className="text-4xl font-bold text-gray-900 mt-2">{stats.total_classes}</p>
               </div>
-              <div className="bg-blue-100 p-4 rounded-lg">
-                <BookOpen className="w-8 h-8 text-blue-600" />
+              <div className="bg-brandPurple-100 p-4 rounded-lg">
+                <BookOpen className="w-8 h-8 text-brandPurple-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
+          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-brandYellow-500">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Lớp đang dạy</p>
                 <p className="text-4xl font-bold text-gray-900 mt-2">{stats.active_classes}</p>
               </div>
-              <div className="bg-green-100 p-4 rounded-lg">
-                <CheckCircle2 className="w-8 h-8 text-green-600" />
+              <div className="bg-brandYellow-100 p-4 rounded-lg">
+                <CheckCircle2 className="w-8 h-8 text-yellow-800" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500">
+          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-brandPurple-400">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Tổng học viên</p>
                 <p className="text-4xl font-bold text-gray-900 mt-2">{stats.total_students}</p>
               </div>
-              <div className="bg-purple-100 p-4 rounded-lg">
-                <Users className="w-8 h-8 text-purple-600" />
+              <div className="bg-brandPurple-200 p-4 rounded-lg">
+                <Users className="w-8 h-8 text-brandPurple-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-500">
+          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-brandPurple-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Tiến độ trung bình</p>
@@ -204,8 +204,8 @@ export default function TeacherDashboard() {
                   {stats.avg_completion.toFixed(0)}%
                 </p>
               </div>
-              <div className="bg-orange-100 p-4 rounded-lg">
-                <TrendingUp className="w-8 h-8 text-orange-600" />
+              <div className="bg-gradient-to-br from-brandPurple-50 to-brandYellow-50 p-4 rounded-lg">
+                <TrendingUp className="w-8 h-8 text-brandPurple-600" />
               </div>
             </div>
           </div>
@@ -254,7 +254,7 @@ export default function TeacherDashboard() {
                     </div>
 
                     {/* Course Info */}
-                    <div className="mb-4 pb-4 border-b border-gray-200">
+                    <div className="mb-4 pb-4 border-b border-brandPurple-200">
                       <button
                         onClick={() =>
                           router.push(
@@ -277,7 +277,7 @@ export default function TeacherDashboard() {
                           <span className="font-semibold">{classItem.current_enrollment_count}</span>
                           <span className="text-gray-600">/{classItem.max_students} học viên</span>
                           {classItem.is_full && (
-                            <span className="ml-2 text-orange-600 font-medium">(Đầy)</span>
+                            <span className="ml-2 text-brandPurple-600 font-medium">(Đầy)</span>
                           )}
                         </span>
                       </div>
@@ -307,7 +307,7 @@ export default function TeacherDashboard() {
                             `/programs/lp-trinh-spike-essential-c-bn/subcourses/${classItem.subcourse_slug}`
                           )
                         }
-                        className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                        className="flex items-center justify-center gap-2 px-4 py-2 bg-brandPurple-50 text-brandPurple-700 rounded-lg hover:bg-brandPurple-100 transition-colors text-sm font-medium"
                       >
                         <BookOpen className="w-4 h-4" />
                         Khóa học
