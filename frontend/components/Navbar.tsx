@@ -76,8 +76,8 @@ export default function Navbar() {
     { name: 'Trang chủ', href: '/', icon: Home },
   ];
 
-  // Thêm "Khóa học của tôi" chỉ khi không phải teacher
-  if (userRole !== 'TEACHER') {
+  // Thêm "Khóa học của tôi" chỉ khi đã đăng nhập và không phải teacher hoặc admin
+  if (isAuthenticated && userRole !== 'TEACHER' && userRole !== 'ADMIN') {
     menuItems.push({ name: 'Khóa học của tôi', href: '/my-courses', icon: BookOpen });
   }
 
