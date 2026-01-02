@@ -5,9 +5,12 @@ Mở rộng: Quản lý Objectives, Models, Preparation, BuildBlocks,
 ContentBlocks, Attachments, Challenges, Quizzes
 """
 from django.contrib import admin
+from django.contrib.admin import AdminSite
+from django.template.response import TemplateResponse
 from django.utils.html import format_html
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from django.apps import apps
 from .models import (
     Program, Subcourse, Lesson, UserProgress,
     Media, LessonObjective, LessonModel, AssemblyGuide, Preparation,
@@ -787,19 +790,20 @@ class BuildBlockAdmin(admin.ModelAdmin):
 class LessonContentBlockAdmin(admin.ModelAdmin):
     """Admin cho Khối nội dung học"""
     list_display = [
-        'lesson',
+        'hierarchy_path',
         'title',
         'content_type_badge',
         'media_count',
         'order',
     ]
-    list_display_links = ['lesson', 'title']
+    list_display_links = ['hierarchy_path', 'title']
     list_editable = ['order']
     
     list_filter = [
         'content_type',
         'lesson__subcourse__program',
         'lesson__subcourse',
+        'lesson',
     ]
     
     search_fields = [
@@ -807,6 +811,8 @@ class LessonContentBlockAdmin(admin.ModelAdmin):
         'subtitle',
         'description',
         'lesson__title',
+        'lesson__subcourse__title',
+        'lesson__subcourse__program__title',
     ]
     
     filter_horizontal = ['media']
@@ -824,8 +830,41 @@ class LessonContentBlockAdmin(admin.ModelAdmin):
         }),
     )
     
-    list_per_page = 30
-    ordering = ['lesson', 'order']
+    list_per_page = 50
+    ordering = ['lesson__subcourse__program', 'lesson__subcourse', 'lesson', 'order']
+    
+    def hierarchy_path(self, obj):
+        """Hiển thị đường dẫn phân cấp: Program > Subcourse > Lesson"""
+        program = obj.lesson.subcourse.program.title
+        subcourse = obj.lesson.subcourse.title
+        lesson = obj.lesson.title
+        
+        # Rút gọn tên nếu quá dài
+        if len(program) > 30:
+            program = program[:27] + '...'
+        if len(subcourse) > 35:
+            subcourse = subcourse[:32] + '...'
+        if len(lesson) > 40:
+            lesson = lesson[:37] + '...'
+        
+        return format_html(
+            '<div style="line-height: 1.5; min-width: 250px;">'
+            '<div style="color: #007BFF; font-weight: bold; font-size: 0.95em; margin-bottom: 2px;">'
+            '<span style="background: #E7F3FF; padding: 2px 6px; border-radius: 3px;">📚 {}</span>'
+            '</div>'
+            '<div style="color: #6C757D; font-size: 0.9em; margin-left: 8px; margin-bottom: 2px;">'
+            '<span style="background: #F8F9FA; padding: 2px 6px; border-radius: 3px;">📖 {}</span>'
+            '</div>'
+            '<div style="color: #28A745; font-size: 0.85em; margin-left: 16px;">'
+            '<span style="background: #E8F5E9; padding: 2px 6px; border-radius: 3px;">📝 {}</span>'
+            '</div>'
+            '</div>',
+            program,
+            subcourse,
+            lesson
+        )
+    hierarchy_path.short_description = 'Phân cấp'
+    hierarchy_path.admin_order_field = 'lesson__subcourse__program__title'
     
     def content_type_badge(self, obj):
         """Hiển thị loại nội dung"""
@@ -1400,8 +1439,117 @@ class QuizAnswerAdmin(admin.ModelAdmin):
 
 
 # ============================================================================
-# TUỲ CHỈNH ADMIN SITE
+# TUỲ CHỈNH ADMIN SITE - Tách thành các nhóm quản lý
 # ============================================================================
+
+# Định nghĩa các nhóm model
+HIERARCHY_MODELS = ['program', 'subcourse', 'lesson']
+
+CONTENT_DETAIL_MODELS = [
+    'lessoncontentblock', 'lessonobjective', 'lessonmodel', 
+    'assemblyguide', 'preparation', 'buildblock', 
+    'lessonattachment', 'challenge', 'quiz', 
+    'quizquestion', 'questionoption'
+]
+
+OTHER_MODELS = ['media', 'userprogress', 'quizsubmission', 'quizanswer']
+
+
+def get_grouped_app_list(request):
+    """Tách models trong content app thành các nhóm riêng biệt"""
+    app_list = admin.site.get_app_list(request)
+    
+    # Tìm content app
+    content_app = None
+    content_app_index = -1
+    for i, app in enumerate(app_list):
+        if app['app_label'] == 'content':
+            content_app = app
+            content_app_index = i
+            break
+    
+    if not content_app:
+        return app_list
+    
+    # Chia models thành các nhóm
+    hierarchy_models = []
+    content_detail_models = []
+    other_models = []
+    
+    for model in content_app['models']:
+        model_name = model['object_name'].lower()
+        if model_name in HIERARCHY_MODELS:
+            hierarchy_models.append(model)
+        elif model_name in CONTENT_DETAIL_MODELS:
+            content_detail_models.append(model)
+        elif model_name in OTHER_MODELS:
+            other_models.append(model)
+        else:
+            # Models không được định nghĩa, thêm vào other
+            other_models.append(model)
+    
+    # Tạo các "app" giả để nhóm models
+    grouped_apps = []
+    
+    # Nhóm 1: Quản lý phân cấp
+    if hierarchy_models:
+        grouped_apps.append({
+            'name': '📚 Quản lý phân cấp',
+            'app_label': 'content_hierarchy',
+            'app_url': '#',
+            'has_module_perms': content_app.get('has_module_perms', True),
+            'models': hierarchy_models,
+        })
+    
+    # Nhóm 2: Quản lý nội dung chi tiết bài học
+    if content_detail_models:
+        grouped_apps.append({
+            'name': '📝 Quản lý nội dung chi tiết bài học',
+            'app_label': 'content_detail',
+            'app_url': '#',
+            'has_module_perms': content_app.get('has_module_perms', True),
+            'models': content_detail_models,
+        })
+    
+    # Nhóm 3: Các mục khác
+    if other_models:
+        grouped_apps.append({
+            'name': '🔧 Các mục khác',
+            'app_label': 'content_other',
+            'app_url': '#',
+            'has_module_perms': content_app.get('has_module_perms', True),
+            'models': other_models,
+        })
+    
+    # Thay thế content app bằng các nhóm
+    new_app_list = app_list[:content_app_index] + grouped_apps + app_list[content_app_index + 1:]
+    
+    return new_app_list
+
+
+# Override admin index view
+original_index = admin.site.index
+
+def custom_index(request, extra_context=None):
+    """Custom admin index với các nhóm models"""
+    app_list = get_grouped_app_list(request)
+    
+    context = {
+        **admin.site.each_context(request),
+        'title': admin.site.index_title,
+        'app_list': app_list,
+        **(extra_context or {}),
+    }
+    
+    request.current_app = admin.site.name
+    
+    return TemplateResponse(
+        request,
+        'admin/index.html',
+        context,
+    )
+
+admin.site.index = custom_index
 
 admin.site.site_header = 'E-Robotic Let\'s Code - Quản trị'
 admin.site.site_title = 'Admin Panel'
