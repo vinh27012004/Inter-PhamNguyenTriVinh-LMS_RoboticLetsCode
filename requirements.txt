@@ -21,3 +21,4 @@ django-filter>=23.0
 
 # Optional: Environment Variables
 # python-decouple>=3.8
+python-dotenv>=1.0.0
