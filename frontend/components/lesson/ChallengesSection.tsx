@@ -126,8 +126,8 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
             {/* Media */}
             {challenge.media && challenge.media.length > 0 && (
               <div>
-                <h4 className="font-semibold text-gray-900 mb-3">🖼️ Hình ảnh hướng dẫn:</h4>
-                <div className="grid grid-cols-2 gap-3">
+                <h4 className="font-semibold text-gray-900 mb-3">🖼️ Hình ảnh / Video hướng dẫn:</h4>
+                <div className="grid gap-3">
                   {challenge.media.map((media) => (
                     <div key={media.id} className="relative aspect-video rounded-lg overflow-hidden border border-gray-300">
                       {media.media_type === 'image' ? (

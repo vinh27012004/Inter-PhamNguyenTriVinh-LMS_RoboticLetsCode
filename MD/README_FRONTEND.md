@@ -1,63 +1,28 @@
-# 🚀 Frontend Setup Guide - E-Robotic Let's Code
+# Frontend Development Guide - E-Robotic Let's Code
 
-## 📁 Cấu trúc dự án
+> **Lưu ý:** Để xem hướng dẫn setup cơ bản, vui lòng xem [README.md](../README.md) ở thư mục gốc.
+
+## 📁 Cấu trúc dự án Frontend
 
 ```
 frontend/
 ├── app/                    # Next.js App Router
 │   ├── layout.tsx         # Root layout với Navbar, Footer
 │   ├── page.tsx           # Home page
-│   └── globals.css        # Global styles với Tailwind
+│   ├── login/             # Trang đăng nhập
+│   ├── my-courses/        # Trang khóa học của tôi
+│   ├── profile/           # Trang profile
+│   └── programs/          # Trang chương trình học
 ├── components/            # React components
-│   └── Navbar.tsx         # Navigation bar
+│   ├── lesson/            # Components cho bài học
+│   ├── Navbar.tsx         # Navigation bar
+│   └── ...
 ├── lib/                   # Utilities
 │   └── axios.js           # Axios instance với interceptors
 ├── services/              # API services
 │   └── robotics.js        # Backend API calls
-├── public/                # Static files
-├── package.json           # Dependencies
-├── tsconfig.json          # TypeScript config
-├── tailwind.config.js     # Tailwind CSS config
-├── next.config.js         # Next.js config
-├── .env.local             # Environment variables
-└── .env.example           # Env template
+└── public/                # Static files
 ```
-
----
-
-## 📦 Cài đặt Dependencies
-
-### Bước 1: Di chuyển vào thư mục frontend
-```powershell
-cd frontend
-```
-
-### Bước 2: Cài đặt packages
-```powershell
-npm install
-```
-
-**Packages được cài:**
-- `next@14.2.0` - Next.js framework
-- `react@18.3.0` - React library
-- `axios@1.6.0` - HTTP client
-- `lucide-react@0.344.0` - Icon library
-- `js-cookie@3.0.5` - Cookie management
-- `tailwindcss@3.4.0` - CSS framework
-- `typescript@5.3.0` - TypeScript
-
----
-
-## ⚙️ Cấu hình Environment Variables
-
-File `.env.local` đã được tạo với:
-```env
-NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api
-```
-
-**Lưu ý:** Không commit `.env.local` lên Git (đã có trong `.gitignore`)
-
----
 
 ## 🛠️ Các tính năng đã triển khai
 
@@ -82,8 +47,6 @@ authHelpers.setTokens(accessToken, refreshToken);
 authHelpers.clearTokens();
 const isLoggedIn = authHelpers.isAuthenticated();
 ```
-
----
 
 ### 2. **API Services (`services/robotics.js`)**
 
@@ -124,8 +87,6 @@ const lesson = await getLessonDetail(1);
 await markLessonComplete(1);
 ```
 
----
-
 ### 3. **Layout & Navbar (`app/layout.tsx`, `components/Navbar.tsx`)**
 
 **Layout Features:**
@@ -136,14 +97,10 @@ await markLessonComplete(1);
 
 **Navbar Features:**
 - ✅ Logo bên trái (gradient blue-purple)
-- ✅ Menu items bên phải:
-  - Trang chủ (/)
-  - Khóa học của tôi (/my-courses)
+- ✅ Menu items bên phải: Trang chủ, Khóa học của tôi
 - ✅ User menu: Profile, Logout
 - ✅ Responsive - Mobile menu (hamburger)
 - ✅ Icons từ Lucide React
-
----
 
 ### 4. **Tailwind CSS Configuration**
 
@@ -157,33 +114,9 @@ await markLessonComplete(1);
 - Custom gradient backgrounds
 - Hover effects, transitions
 
----
-
-## 🚀 Chạy Development Server
-
-```powershell
-npm run dev
-```
-
-**Server sẽ chạy tại:** http://localhost:3000
-
-**Pages có sẵn:**
-- `/` - Home page (Hero, Features, CTA)
-- `/my-courses` - Chưa implement (cần tạo)
-- `/profile` - Chưa implement (cần tạo)
-
----
-
 ## 🔗 Integration với Backend
 
-### Bước 1: Đảm bảo Backend đang chạy
-```powershell
-# Trong thư mục gốc (E-RoboticLet'sCode)
-python manage.py runserver
-# Backend chạy tại: http://127.0.0.1:8000
-```
-
-### Bước 2: Test API từ Frontend
+### Test API từ Frontend
 
 **Trong React component:**
 ```tsx
@@ -218,8 +151,6 @@ export default function MyCoursesPage() {
 }
 ```
 
----
-
 ## 🐛 Troubleshooting
 
 ### Lỗi: "Cannot find module 'next'"
@@ -242,8 +173,6 @@ npm install
 1. Kiểm tra `tailwind.config.js` có đúng content paths
 2. Restart dev server: `npm run dev`
 
----
-
 ## 📝 Next Steps
 
 ### Pages cần implement:
@@ -261,8 +190,6 @@ npm install
 - [ ] Toast notifications
 - [ ] Progress tracking UI
 
----
-
 ## 📚 Resources
 
 **Documentation:**
@@ -272,10 +199,8 @@ npm install
 - [Axios](https://axios-http.com/docs/intro)
 
 **Backend API:**
-- See `../API_ENDPOINTS.md` for full API reference
+- Xem [API_REFERENCE.md](./API_REFERENCE.md) để xem tài liệu API đầy đủ
 - Backend running at: http://127.0.0.1:8000/api/
-
----
 
 ## ✅ Summary
 
@@ -291,16 +216,3 @@ npm install
 **🎯 Ready to start:**
 Frontend đã sẵn sàng để phát triển các pages tiếp theo!
 
-**Run commands:**
-```powershell
-cd frontend
-npm install    # Chỉ cần chạy 1 lần
-npm run dev    # Start dev server
-```
-
-**Open:** http://localhost:3000
-
----
-
-**Generated:** 2025-12-01  
-**Status:** ✅ Setup Complete

@@ -1,37 +1,25 @@
-# E-Robotic Let's Code
+# Tài liệu dự án - E-Robotic Let's Code
 
-Hệ thống học LEGO SPIKE với Django Backend và React Frontend.
+> **Lưu ý:** Để xem hướng dẫn setup và chạy dự án, vui lòng xem [README.md](../README.md) ở thư mục gốc.
 
-## 🎯 Tính năng
+## 📚 Danh sách tài liệu
 
-### Content Management
-- Program → Subcourse → Lesson (3-tier hierarchy)
-- Media management (images, videos, attachments)
-- Quiz & Challenges
-- User Progress tracking
+### Hướng dẫn Setup & Development
+- [QUICKSTART.md](./QUICKSTART.md) - Hướng dẫn setup nhanh
+- [README_FRONTEND.md](./README_FRONTEND.md) - Hướng dẫn chi tiết về Frontend
 
-### User Management
-- Authentication với JWT
-- RBAC (Student, Teacher, Admin)
-- Profile management
+### Tài liệu kỹ thuật
+- [API_REFERENCE.md](./API_REFERENCE.md) - Tài liệu API đầy đủ
+- [SERIALIZERS_SUMMARY.md](./SERIALIZERS_SUMMARY.md) - Tóm tắt Serializers
+- [CODE_SUMMARY.md](./CODE_SUMMARY.md) - Tóm tắt cấu trúc code
 
-### Class Management
-- Tạo và quản lý lớp học
-- Ghi danh học viên
-- Theo dõi tiến độ
+### Hướng dẫn sử dụng
+- [README_ADMIN.md](./README_ADMIN.md) - Hướng dẫn Admin Panel
+- [LESSON_COMPONENTS_GUIDE.md](./LESSON_COMPONENTS_GUIDE.md) - Hướng dẫn Lesson Components
+- [TESTING_GUIDE.md](./TESTING_GUIDE.md) - Hướng dẫn Testing
+- [INDEX.md](./INDEX.md) - Cấu trúc dự án
 
-## 🚀 Bắt đầu
-
-Xem [QUICKSTART.md](./QUICKSTART.md) để setup nhanh.
-
-## 📚 Tài liệu
-
-- [QUICKSTART.md](./QUICKSTART.md) - Setup nhanh
-- [README_ADMIN.md](./README_ADMIN.md) - Admin Panel
-- [API_REFERENCE.md](./API_REFERENCE.md) - API Documentation
-- [LESSON_COMPONENTS_GUIDE.md](./LESSON_COMPONENTS_GUIDE.md) - Lesson Components
-
-## 🏗️ Architecture
+## 🏗️ Kiến trúc hệ thống
 
 ```
 Frontend (React/Next.js)
@@ -41,33 +29,9 @@ Backend (Django + DRF)
 Database (MySQL)
 ```
 
-## 📦 Dependencies
+## 🎯 Tính năng chính
 
-**Backend:**
-- Django >= 4.2
-- djangorestframework
-- djangorestframework-simplejwt
-- django-cors-headers
-- mysqlclient
-
-**Frontend:**
-- Next.js 14
-- React 18
-- TypeScript
-- Axios
-- Tailwind CSS
-
-## 🔧 Development
-
-```powershell
-# Backend
-python manage.py runserver
-
-# Frontend
-cd frontend
-npm run dev
-```
-
-## 📝 License
-
-Private project
+- **Content Management**: Program → Subcourse → Lesson (3-tier hierarchy)
+- **User Management**: JWT Authentication với RBAC (Student, Teacher, Admin)
+- **Class Management**: Quản lý lớp học và theo dõi tiến độ
+- **Progress Tracking**: Theo dõi tiến độ học tập của học viên

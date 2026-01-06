@@ -1,73 +1,38 @@
 # 🚀 QUICK START - E-Robotic Let's Code
 
-Hướng dẫn setup và chạy dự án trong 5 phút.
+> **Lưu ý:** Để xem hướng dẫn setup chi tiết, vui lòng xem [README.md](../README.md) ở thư mục gốc.
 
-## 📋 Yêu cầu
-
-- Python 3.8+
-- MySQL 5.7+
-- Node.js 18+ (cho frontend)
-
-## ⚡ Các bước nhanh
+## ⚡ Các bước nhanh (5 phút)
 
 ### 1. Cài đặt Dependencies
-
 ```powershell
-# Backend
 pip install -r requirements.txt
-
-# Frontend
-cd frontend
-npm install
+cd frontend && npm install
 ```
 
 ### 2. Cấu hình Database
-
-Tạo database trong MySQL:
 ```sql
 CREATE DATABASE IF NOT EXISTS LetCodeEdu;
 ```
+Cấu hình trong `settings.py` (xem [README.md](../README.md) để biết chi tiết)
 
-Cấu hình trong `settings.py`:
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'custom_db',
-        'NAME': 'LetCodeEdu',
-        'USER': 'root',
-        'PASSWORD': 'your_password',
-        'HOST': 'localhost',
-        'PORT': '3306',
-    }
-}
-```
-
-### 3. Migrations
-
+### 3. Migrations & Superuser
 ```powershell
 python manage.py makemigrations
 python manage.py migrate
-```
-
-### 4. Tạo Superuser
-
-```powershell
 python manage.py createsuperuser
 ```
 
-### 5. Chạy Server
-
+### 4. Chạy Server
 ```powershell
-# Backend
+# Terminal 1: Backend
 python manage.py runserver
 
-# Frontend (terminal khác)
-cd frontend
-npm run dev
+# Terminal 2: Frontend
+cd frontend && npm run dev
 ```
 
-### 6. Truy cập
-
+### 5. Truy cập
 - **Admin Panel**: http://127.0.0.1:8000/admin/
 - **API**: http://127.0.0.1:8000/api/
 - **Frontend**: http://localhost:3000
@@ -80,6 +45,7 @@ npm run dev
 
 ## 📚 Tài liệu chi tiết
 
-- [README.md](./README.md) - Tổng quan dự án
+- [README.md](../README.md) - Hướng dẫn setup đầy đủ
 - [README_ADMIN.md](./README_ADMIN.md) - Hướng dẫn Admin Panel
 - [API_REFERENCE.md](./API_REFERENCE.md) - Tài liệu API
+- [README_FRONTEND.md](./README_FRONTEND.md) - Hướng dẫn Frontend
