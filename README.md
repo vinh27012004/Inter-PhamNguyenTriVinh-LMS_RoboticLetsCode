@@ -124,7 +124,7 @@ Frontend sẽ chạy tại: http://localhost:3000
 
 **MSSV**: 64132994
 
-**Trường/Lớp**: 64-CNTT_CLCCLC
+**Trường/Lớp**: 64-CNTT_CLC
 
 ---
 
